@@ -1,0 +1,76 @@
+\begin{thebibliography}{}
+
+\bibitem[{Anthropic}, 2023]{claude2023conversations}
+{Anthropic} (2023).
+\newblock Conversaciones con claude ai assistant.
+\newblock Utilizado para estructura de documentos LaTeX, y mejoramiento del código en R.
+
+\bibitem[{Banco Mundial}, 2024]{bm2024}
+{Banco Mundial} (2024).
+\newblock Trayectorias: Prosperidad y reducción de la pobreza en el territorio colombiano.
+\newblock Technical report, Banco Mundial, Washington, D. C., Estados Unidos de América.
+\newblock Publicado el 3 de diciembre de 2024.
+
+\bibitem[Castillo-Álvarez and Sarmiento-Barbieri, 2024a]{missing_values_part1}
+Castillo-Álvarez, G. and Sarmiento-Barbieri, I. (2024a).
+\newblock Data pre-processing: Visualizing and handling missing values (part 1).
+\newblock Notebook proporcionado como material del curso.
+
+\bibitem[Castillo-Álvarez and Sarmiento-Barbieri, 2024b]{missing_values_part2}
+Castillo-Álvarez, G. and Sarmiento-Barbieri, I. (2024b).
+\newblock Data pre-processing: Visualizing and handling missing values (part 2).
+\newblock Notebook proporcionado como material del curso.
+
+\bibitem[Huang et~al., 2025]{huang2025unveiling}
+Huang, S., Shao, Y., Hu, L., Bi, J., and Ma, Z. (2025).
+\newblock Unveiling the spatio-temporal patterns and mechanisms of poverty incidence in southwest china through multi-sourced data and interpretable machine learning.
+\newblock {\em Applied Geography}, 176:103541.
+
+\bibitem[Huffman and Nájera, 2024]{huffman2024measurement}
+Huffman, C. and Nájera, H. (2024).
+\newblock What we talk about when we talk about measurement in poverty research.
+\newblock {\em Problemas del desarrollo}, 55(217):89--102.
+
+\bibitem[James et~al., 2021]{james2021introduction}
+James, G., Witten, D., Hastie, T., and Tibshirani, R. (2021).
+\newblock {\em An Introduction to Statistical Learning: with Applications in R}.
+\newblock Springer, New York, NY, 2 edition.
+
+\bibitem[Karmaker et~al., 2025]{karmaker2025machine}
+Karmaker, S.~C., Rjbongshi, A., Pal, B., Sen, K.~K., and Chapman, A.~J. (2025).
+\newblock Machine learning-based prediction of energy poverty in bangladesh: Unveiling key socioeconomic drivers for targeted policy actions.
+\newblock {\em Socio-Economic Planning Sciences}, 99:102213.
+
+\bibitem[{OpenAI}, 2023]{chatgpt2023conversations}
+{OpenAI} (2023).
+\newblock Conversaciones con chatgpt.
+\newblock Utilizado para estructura de documentos LaTeX, y mejoramiento del código en R.
+
+\bibitem[Sarmiento-Barbieri, 2024]{data_cleaning_tidyverse}
+Sarmiento-Barbieri, I. (2024).
+\newblock Limpieza de datos con tidyverse.
+\newblock Notebook proporcionado como material del curso.
+
+\bibitem[Sarmiento-Barbieri and Castillo-Álvarez, 2024a]{caret_clase}
+Sarmiento-Barbieri, I. and Castillo-Álvarez, G. (2024a).
+\newblock Caret para clasificación.
+\newblock Material del curso BDML, Universidad de los Andes.
+\newblock Notebook proporcionado como material del curso.
+
+\bibitem[Sarmiento-Barbieri and Castillo-Álvarez, 2024b]{classification_cuaderno}
+Sarmiento-Barbieri, I. and Castillo-Álvarez, G. (2024b).
+\newblock Classification - cuaderno de clase.
+\newblock Notebook proporcionado como material del curso.
+
+\bibitem[Sarmiento-Barbieri and Castillo-Álvarez, 2024c]{uniendo_bases}
+Sarmiento-Barbieri, I. and Castillo-Álvarez, G. (2024c).
+\newblock Uniendo bases y calculando pobreza.
+\newblock Material del curso BDML, Universidad de los Andes.
+\newblock Notebook proporcionado como guía para el taller.
+
+\bibitem[Tal, 2016]{tal2016measuring}
+Tal, E. (2016).
+\newblock How does measuring generate evidence? the problem of observational grounding.
+\newblock {\em Journal of Physics: Conference Series}, 772(1):012001.
+
+\end{thebibliography}
