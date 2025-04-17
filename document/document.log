@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2025.2.23)  13 APR 2025 22:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2025.2.23)  17 APR 2025 14:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -685,180 +685,16 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 [1
 
 {/Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-<../views/figures/pobreza_colombia.png, id=166, 736.7525pt x 376.40625pt>
-File: ../views/figures/pobreza_colombia.png Graphic file (type png)
-<use ../views/figures/pobreza_colombia.png>
-Package pdftex.def Info: ../views/figures/pobreza_colombia.png  used on input line 133.
-(pdftex.def)             Requested size: 385.02547pt x 196.70876pt.
-
 
 [2]
-Overfull \hbox (0.45018pt too wide) in paragraph at lines 148--149
-[]\T1/cmr/m/n/12 Para es-te aná-li-sis, dis-po-ne-mos de cua-tro con-jun-tos de da-tos: \T1/cmtt/m/n/12 train_hogares.csv \T1/cmr/m/n/12 (164,960
- []
 
+[3]
 
+[4
 
-[3 <../views/figures/pobreza_colombia.png>]
-Overfull \hbox (24.23042pt too wide) in paragraph at lines 174--175
-[]\T1/cmr/m/n/12 Variables de iden-ti-fi-ca-ción o pon-de-ra-ción que no apor-ta-ban va-lor pre-dic-ti-vo: \T1/cmtt/m/n/12 Directorio\T1/cmr/m/n/12 ,
- []
+] (./document.bbl)
 
-
-
-[4]
-
-[5]
-Overfull \hbox (19.04555pt too wide) in paragraph at lines 228--229
-[]\T1/cmr/bx/n/12 Imputación pa-ra va-ria-bles nu-mé-ri-cas\T1/cmr/m/n/12 : Pa-ra va-ria-bles co-mo \T1/cmtt/m/n/12 promedio_horas_trab\T1/cmr/m/n/12 ,
- []
-
-
-Overfull \hbox (21.21864pt too wide) in paragraph at lines 230--231
-[]\T1/cmr/bx/n/12 Imputación pa-ra va-ria-bles ca-te-gó-ri-cas\T1/cmr/m/n/12 : Pa-ra va-ria-bles co-mo \T1/cmtt/m/n/12 max_nivel_educativo
- []
-
-
-
-[6]
-Overfull \hbox (18.06845pt too wide) in paragraph at lines 251--252
-\T1/cmr/m/n/12 al-ta pro-por-ción de va-lo-res atí-pi-cos. Va-ria-bles co-mo \T1/cmtt/m/n/12 prop_P7120\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 prop_P7150 \T1/cmr/m/n/12 y \T1/cmtt/m/n/12 prop_P7510s3
- []
-
-
-Overfull \hbox (71.99739pt too wide) in paragraph at lines 251--252
-\T1/cmr/m/n/12 pre-sen-ta-ron más del 23$ $% de outliers, mien-tras que va-ria-bles fun-da-men-ta-les co-mo \T1/cmtt/m/n/12 promedio_horas_trab
- []
-
-
-
-[7]
-
-[8]
-
-[9]
-
-[10]
-
-[11]
-
-[12]
-
-[13] (../views/tables/01_descriptiva_personas_continua.tex
-Overfull \hbox (103.96692pt too wide) in alignment at lines 1--6
- [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (103.96692pt too wide) in alignment at lines 6--12
- [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (103.96692pt too wide) in alignment at lines 12--16
- [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (103.96692pt too wide) in alignment at lines 16--19
- [] [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (103.96692pt too wide) in alignment at lines 19--79
- [] [] [] [] [] [] [] [] 
- []
-
-[14
-
-]) (../views/tables/02_descriptiva_personas_discreta.tex
-Overfull \hbox (108.46252pt too wide) in alignment at lines 1--7
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (108.46252pt too wide) in alignment at lines 7--14
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (108.46252pt too wide) in alignment at lines 14--18
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (108.46252pt too wide) in alignment at lines 18--21
- [] [] [] [] [] [] [] 
- []
-
-
-Overfull \hbox (108.46252pt too wide) in alignment at lines 21--93
- [] [] [] [] [] [] [] 
- []
-
-[15] [16]) (../views/tables/03_variables_modelos.tex
-Overfull \hbox (27.56824pt too wide) in paragraph at lines 35--35
-[]|\T1/cmr/m/n/12 Ingresos_AlquilerPensiones| 
- []
-
-
-LaTeX Warning: Float too large for page by 47.8068pt on input line 40.
-
-) (../views/tables/04_tabla_logit.tex
-Overfull \hbox (69.97931pt too wide) in paragraph at lines 5--31
- [][] 
- []
-
-) (../views/tables/05_tabla_1_cart.tex
-Overfull \hbox (38.06558pt too wide) in paragraph at lines 5--17
- [][] 
- []
-
-) (../views/tables/06_tabla_2_cart.tex
-Overfull \hbox (32.19202pt too wide) in paragraph at lines 5--17
- [][] 
- []
-
-) (../views/tables/07_tabla_elastic_net.tex
-Overfull \hbox (119.56526pt too wide) in paragraph at lines 5--17
- [][] 
- []
-
-) (../views/tables/08_tabla_naive_bayes.tex
-Overfull \hbox (119.56526pt too wide) in paragraph at lines 5--17
- [][] 
- []
-
-) (../views/tables/09_tabla_gbm.tex
-Overfull \hbox (102.70827pt too wide) in paragraph at lines 5--26
- [][] 
- []
-
-) (../views/tables/10_matriz_1_cart.tex) (../views/tables/11_matriz_2_cart.tex) (../views/tables/12_matriz_elastic_net.tex) (../views/tables/13_matriz_logit.tex
-
-[17]
-
-[18]
-
-[19]
-
-[20]
-
-[21]
-
-[22]
-
-[23]) (../views/tables/14_matriz_naive_bayes.tex) (../views/tables/15_matriz_gbm.tex)
-
-[24]
-
-[25]
-
-[26]
-
-[27] (./document.bbl)
-
-[28] (./document.aux
+[5] (./document.aux
 LaTeX Info: Redefining \. on input line 12.
 LaTeX Info: Redefining \% on input line 12.
 )
@@ -867,21 +703,21 @@ LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `document.out' has not changed.
-(rerunfilecheck)             Checksum: B9C5F91EB4E510CA3950CB26C3DD9F39;7517.
+(rerunfilecheck)             Checksum: 7A4CAB7F016A9933AFE54DA154CBBAA0;3938.
  ) 
 Here is how much of TeX's memory you used:
- 16655 strings out of 475113
- 270563 string characters out of 5762667
- 740847 words of memory out of 5000000
- 39245 multiletter control sequences out of 15000+600000
- 572964 words of font info for 67 fonts, out of 8000000 for 9000
+ 16388 strings out of 475113
+ 264224 string characters out of 5762667
+ 691502 words of memory out of 5000000
+ 39107 multiletter control sequences out of 15000+600000
+ 571434 words of font info for 65 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 75i,12n,79p,1563b,637s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1728.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1095.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1440.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2074.600pk></Users/cesaralfaro/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></Users/cesaralfaro/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></Users/cesaralfaro/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></Users/cesaralfaro/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></Users/cesaralfaro/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></Users/cesaralfaro/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></Users/cesaralfaro/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></Users/cesaralfaro/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/cesaralfaro/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on document.pdf (28 pages, 398396 bytes).
+ 75i,5n,79p,386b,584s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1728.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1095.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1440.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2074.600pk>
+Output written on document.pdf (5 pages, 95662 bytes).
 PDF statistics:
- 831 PDF objects out of 1000 (max. 8388607)
- 409 compressed objects within 5 object streams
- 121 named destinations out of 1000 (max. 500000)
- 294 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 450 PDF objects out of 1000 (max. 8388607)
+ 165 compressed objects within 2 object streams
+ 40 named destinations out of 1000 (max. 500000)
+ 169 words of extra memory for PDF output out of 10000 (max. 10000000)
 

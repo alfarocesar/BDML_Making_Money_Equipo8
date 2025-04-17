@@ -63,10 +63,11 @@
 %     TÍTULO, AUTORES Y FECHA              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{\textbf{Taller 2 - Predicción de Pobreza en Colombia}}
+\title{\textbf{Taller 3 - Making Money with Machine Learning}}
 
 \author{%
 \begin{center}
+
 Harold Stiven Acuña\\
 José David Cuervo\\
 José David Dávila\\
@@ -90,19 +91,19 @@ César Augusto Alfaro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract}
-Este documento presenta el análisis de datos y la implementación de modelos de clasificación para la predicción de la pobreza en Colombia.
+Texto del abstract
 \end{abstract}
 
 \medskip
 
 \begin{flushleft}
-    {\bf Palabras clave:} pobreza, clasificación, aprendizaje automático \\
+    {\bf Palabras clave:} precio de propiedades, aprendizaje automático \\
     {\bf Clasificación JEL:} J31, C53, J16
 \end{flushleft}
 
 % Añadir información del repositorio GitHub
 \begin{center}
-    \textit{Repositorio GitHub:} \url{https://github.com/alfarocesar/BDML_Predicting_Poverty_Equipo8}
+    \textit{Repositorio GitHub:} \url{https://github.com/alfarocesar/BDML_Making_Money_Equipo8}
 \end{center}
 
 \pagebreak
@@ -116,165 +117,31 @@ Este documento presenta el análisis de datos y la implementación de modelos de
 
 \section{Introducción}
 
-La migración del campo a la ciudad, producto de la Primera y Segunda Revolución Industrial, trajo consigo un aumento significativo de la población, así como conflictos de orden político, económico y social, en igual medida para todos los países que decidieron sumarse a dicho proceso de transformación emergente, como Gran Bretaña, Francia, Alemania, Estados Unidos, entre otros. Es así como la pobreza, como concepto abstracto y simbólico, se introduce en la discusión del mundo científico, mismo que se encontraba en auge, no solo para las ciencias exactas que derivan de las leyes de la física, sino también en ciencias cuyo objeto de estudio resultaba más abstracto y retador, aún en nuestros tiempos: la sociedad.
-
-La pobreza, entonces, generó la inminente necesidad de ser considerada, sobre todo, para encontrar formas de medición acertadas. La razón de ser de ello es muy sencilla: a medida que la sociedad avanzaba, el discurso de los derechos se hizo más fuerte; la dignidad, el mínimo vital, el contrato social, entre otros, se hicieron vigentes y, en consecuencia, la pobreza se convirtió en objeto de estudio, con el propósito de determinar su existencia, evolución y distribución.
-
-En este punto, la medición de la pobreza adquiere especial relevancia y su análisis, con el paso del tiempo, ha incluido inferencia, teoría, estadística, abstracción, idealización, predicción, cálculo y construcción de instrumentos \cite{tal2016measuring}. Sin embargo, aún falta teoría y una estructura definida que permita a los investigadores concluir que determinada asignación numérica representa adecuadamente la característica de la pobreza que se pretende medir \cite{huffman2024measurement}.
-
-Amartya Sen señala que la pobreza se mide no solo frente a la falta de ingresos y recursos, sino también en la falta de capacidades que restringen las opciones y oportunidades de las personas. Así las cosas, sobrevienen dos dificultades hasta el momento: la falta de una estructura para medir la pobreza y la determinación de las características que representan dicha pobreza.
-
-Una medición precisa, eficiente y oportuna de la pobreza es clave para diseñar políticas públicas que sean no solo efectivas, sino también costo-eficientes. Sin embargo, los métodos tradicionales de medición —basados en encuestas extensas— implican altos costos y tiempos prolongados de recolección, procesamiento y análisis. En respuesta a esta limitación, el uso de técnicas de \textit{machine learning} ofrece una alternativa prometedora: construir modelos que permitan predecir la condición de pobreza de los hogares utilizando un número reducido de variables y, en consecuencia, realizar evaluaciones más rápidas y baratas.
-
-Este proyecto busca desarrollar modelos de clasificación binaria que permitan identificar si un hogar colombiano se encuentra en condición de pobreza, utilizando microdatos del DANE y la Misión MESE, a nivel de hogar e individuo. La Figura~\ref{fig:pobreza_colombia} ilustra la evolución reciente de la pobreza en el país, motivando así la necesidad de mejorar las herramientas de diagnóstico.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.85\textwidth]{../views/figures/pobreza_colombia.png}
-  \caption{Evolución reciente de la pobreza monetaria en Colombia.}
-  \label{fig:pobreza_colombia}
-\end{figure}
-
-A lo largo del documento se evalúan diferentes algoritmos de clasificación (como regresión logística, árboles de decisión, random forest, entre otros) y se presenta una comparación sistemática de su desempeño. El modelo con mejor rendimiento logró una puntuación F1 de \textbf{[0.5686]}, utilizando solo \textbf{[número]} variables, lo que representa un avance en términos de precisión y simplicidad. Este modelo fue seleccionado como la base para las predicciones entregadas en Kaggle.
-
-Además de identificar el mejor algoritmo, se discute la importancia relativa de las variables predictoras, destacando aquellas con mayor capacidad explicativa. Estos hallazgos permiten no solo mejorar la focalización de políticas sociales, sino también abrir camino para sistemas de monitoreo más ágiles y adaptativos.
+Incluir la introducción
 
 \section{Datos}
 
 \subsection{Adecuación de los datos}
 
-Los datos utilizados en este estudio provienen del DANE y la misión ``Empalme de las Series de Empleo, Pobreza y Desigualdad (MESE)''. Estos datos son idóneos para resolver el problema de predicción de pobreza por varias razones fundamentales. Primero, contienen información detallada a nivel de hogar e individuo, permitiendo capturar la heterogeneidad socioeconómica de los diferentes grupos poblacionales. Segundo, incluyen la variable objetivo (Pobre) correctamente definida según el criterio oficial: un hogar es clasificado como pobre si su ingreso per cápita es menor a la línea de pobreza establecida. Finalmente, contienen un conjunto completo de variables sobre composición demográfica, características laborales, educativas y de vivienda que la literatura ha identificado como teóricamente relevantes para explicar la pobreza.
-
-Para este análisis, disponemos de cuatro conjuntos de datos: \texttt{train\_hogares.csv} (164,960 observaciones y 23 variables), \texttt{train\_personas.csv} (543,109 observaciones y 135 variables), \texttt{test\_hogares.csv} (66,168 observaciones y 16 variables) y \texttt{test\_personas.csv} (150,367 observaciones y 63 variables). Esta configuración permite realizar predicciones fuera de muestra, lo que representa un desafío adicional ya que varias variables presentes en los datos de entrenamiento están ausentes en los de prueba, simulando un escenario real donde no toda la información está disponible al momento de realizar predicciones.
-
-Como verificación preliminar, comprobamos que la variable objetivo \textit{Pobre} estuviera correctamente definida siguiendo la metodología del DANE mediante dos métodos diferentes:
-
-\begin{equation}
-\text{Pobre\_calculado} = I(\text{Ingpcug} < \text{Lp})
-\end{equation}
-
-\begin{equation}
-\text{Pobre\_calculado2} = I(\text{Ingtotugarr} < \text{Lp} \times \text{Npersug})
-\end{equation}
-
-Al realizar esta validación, obtuvimos una coincidencia del 100\% con la variable original, confirmando su correcta definición. La distribución de la variable objetivo reveló un desbalance importante: aproximadamente el 80\% de los hogares se clasifican como no pobres (131,936 hogares), mientras que el 20\% son considerados pobres (33,024 hogares), con un ratio de desbalance de aproximadamente 4:1.
-
 \subsection{Construcción de la muestra}
-
-El proceso de construcción de la muestra involucró varios pasos clave:
 
 \subsubsection{Análisis y limpieza de las bases de datos}
 
-Iniciamos con un examen detallado de las variables disponibles en las bases de entrenamiento y prueba, identificando que entre las bases de hogares existen 16 variables comunes, mientras que entre las bases de personas hay 63 variables comunes. Este análisis fue crucial para determinar qué variables podíamos utilizar en nuestros modelos predictivos.
-
-Se identificaron y eliminaron variables que no aportaban valor predictivo o que no estaban disponibles en los conjuntos de prueba:
-
-\begin{enumerate}
-   \item Variables exclusivas de entrenamiento que indicaban directamente el resultado: \texttt{Ingtotug}, \texttt{Ingtotugarr}, \texttt{Ingpcug}, \texttt{Indigente}, \texttt{Npobres}, \texttt{Nindigentes}.
-   \item Variables de identificación o ponderación que no aportaban valor predictivo: \texttt{Directorio}, \texttt{Secuencia\_p}, \texttt{Mes}, \texttt{P5130}, \texttt{Fex\_c}, \texttt{Fex\_dpto}.
-   \item En la base de personas, se eliminaron 72 variables que no estaban presentes en los datos de prueba, principalmente relacionadas con montos de ingresos.
-\end{enumerate}
-
-Para las variables \texttt{P5100} (valor del arriendo) y \texttt{P5140} (pago por servicios), las cuales presentaban valores faltantes, realizamos una imputación específica reemplazando los NA con 0, entendiendo que estos representan gastos que pueden legítimamente no existir.
-
 \subsubsection{Transformación de variables de personas}
-
-La base de personas requirió un procesamiento especial:
-
-\begin{enumerate}
-   \item \textbf{Variables binarias}: Para variables como \texttt{Pet}, \texttt{Oc}, \texttt{Des}, \texttt{Ina} que solo toman valores 1 y NA, transformamos los NA a 0 para estandarizar su uso en los cálculos agregados.
-
-   \item \textbf{Agrupación de la variable Oficio}: Analizamos la relación entre las diferentes categorías de oficios y la pobreza. Mediante un análisis de clustering (k-means con k=3), agrupamos los 83 códigos originales en tres categorías según su asociación con la pobreza:
-   \begin{itemize}
-       \item \textbf{Grupo 1}: 45 ocupaciones con baja tasa de pobreza (media de 5.3\%)
-       \item \textbf{Grupo 2}: 28 ocupaciones con tasa media de pobreza (media de 19.4\%)
-       \item \textbf{Grupo 3}: 10 ocupaciones con alta tasa de pobreza (media de 37.5\%)
-   \end{itemize}
-
-   \item \textbf{Variables calculadas adicionales}: Creamos variables como \texttt{tiene\_arriendo}, \texttt{tiene\_otros\_ingresos} y \texttt{otro\_bene\_año} para capturar información económica relevante.
-\end{enumerate}
 
 \subsubsection{Agregación de datos a nivel de hogar}
 
-Para poder construir un modelo a nivel de hogar utilizando la información de individuos, realizamos varias agregaciones:
-
-\begin{enumerate}
-   \item \textbf{Conteos básicos y promedios}: Calculamos el número de miembros por hogar, número de hombres, mujeres, menores, personas en edad de trabajar, ocupados, desocupados e inactivos. También calculamos la edad promedio, máxima edad y máximo nivel educativo en el hogar.
-
-   \item \textbf{Características del jefe de hogar}: Extrajimos variables específicas del jefe de hogar (identificado con \texttt{P6050 = 1}), como sexo, edad, nivel educativo, años de educación y situación laboral.
-
-   \item \textbf{Proporciones de variables categóricas}: Para 31 variables categóricas relevantes, calculamos proporciones dentro de cada hogar (por ejemplo, proporción de miembros que cotizan a pensión o proporción con actividad adicional).
-\end{enumerate}
-
-Tras este procesamiento, logramos construir conjuntos de datos unificados con 79 variables para entrenamiento y 78 para prueba (la diferencia está en la variable objetivo \texttt{Pobre} que solo existe en entrenamiento), manteniendo la estructura de un registro por hogar.
-
 \subsection{Limpieza de datos y tratamiento de valores faltantes}
-
-El análisis de valores faltantes reveló patrones importantes en nuestros datos. Mediante el uso de las funciones \texttt{skim} y \texttt{vis\_miss}, identificamos que:
-
-\begin{enumerate}
-   \item El conjunto de entrenamiento unido presentaba valores faltantes en 36 variables, con proporciones que variaban desde el 10.9\% (para \texttt{prop\_cotiza\_pension}) hasta el 54.5\% (para \texttt{prop\_P7110} y \texttt{prop\_P7120}).
-
-   \item Se observó un patrón diferente de valores faltantes entre el conjunto de entrenamiento y prueba. En el conjunto de prueba, la proporción de faltantes era significativamente mayor para todas las variables, llegando a superar el 50\% en muchos casos (por ejemplo, \texttt{prop\_P7510s1} a \texttt{prop\_P7510s7} con 55.7\% de faltantes).
-
-   \item El análisis de correlación de valores faltantes reveló que variables relacionadas con características similares (como distintos tipos de ingresos o subsidios) presentaban patrones similares de valores faltantes, lo que sugiere un origen estructural en la ausencia de datos.
-\end{enumerate}
-
-Para abordar estos valores faltantes, tomamos las siguientes decisiones:
-
-\begin{enumerate}
-   \item \textbf{Variables con alta proporción de faltantes ($>$30\%)}: Evaluamos cuidadosamente su relevancia. Decidimos mantener algunas de estas variables a pesar de su alta proporción de faltantes debido a su potencial poder predictivo, aplicando métodos adecuados de imputación.
-
-   \item \textbf{Imputación para variables numéricas}: Para variables como \texttt{promedio\_horas\_trab}, \texttt{prop\_cotiza\_pension} y \texttt{prop\_actividad\_adicional}, utilizamos la imputación por la mediana para mantener la robustez frente a outliers.
-
-   \item \textbf{Imputación para variables categóricas}: Para variables como \texttt{max\_nivel\_educativo} y \texttt{max\_años\_educ}, aplicamos imputación por la moda, dada su naturaleza discreta.
-\end{enumerate}
 
 \subsection{Análisis descriptivo}
 
 \subsubsection{Distribución de variables numéricas}
 
-El análisis descriptivo de las variables numéricas revela aspectos importantes de las características socioeconómicas de los hogares estudiados. Las estadísticas descriptivas de las variables continuas (como se muestra en el Anexo 1) y discretas (Anexo 2) proporcionan una visión detallada de la distribución de estas variables.
-
-Entre los hallazgos más relevantes, observamos que:
-
-\begin{itemize}
-   \item El promedio de miembros por hogar es de 3.29 personas, con un máximo de 28 personas en algunos casos extremos.
-   \item La edad promedio en los hogares es de 37.44 años, mientras que la edad media de los jefes de hogar es considerablemente más alta: 49.61 años.
-   \item El promedio de horas trabajadas entre las personas ocupadas es de 45.25 horas semanales, con una importante variabilidad (desviación estándar de 13.11).
-   \item Solo el 31\% de las personas en edad de trabajar cotiza a pensión, lo que refleja una importante informalidad laboral.
-   \item La proporción de ocupaciones por grupos muestra que el 51\% de los trabajadores se encuentran en ocupaciones del grupo 2 (tasa media de pobreza), mientras que solo el 6\% están en ocupaciones del grupo 3 (alta tasa de pobreza).
-\end{itemize}
-
 \subsubsection{Análisis de outliers}
-
-Mediante la aplicación del método IQR (rango intercuartílico), identificamos variables con alta proporción de valores atípicos. Variables como \texttt{prop\_P7120}, \texttt{prop\_P7150} y \texttt{prop\_P7510s3} presentaron más del 23\% de outliers, mientras que variables fundamentales como \texttt{promedio\_horas\_trab} (12.4\% de outliers) y \texttt{prop\_afiliados\_ss} (12.32\% de outliers) también mostraron una cantidad significativa de valores extremos. Estos hallazgos fueron considerados durante el procesamiento y modelado para evitar que valores extremos afectaran indebidamente nuestras predicciones.
 
 \subsubsection{Relación con la variable objetivo}
 
-El análisis de la relación entre las variables predictoras y la pobreza reveló asociaciones significativas:
-
-\begin{enumerate}
-   \item \textbf{Variables numéricas}: Calculamos la correlación de cada variable numérica con la variable objetivo, encontrando que variables como \texttt{prop\_cotiza\_pension} (-0.51), \texttt{prop\_oficio\_grupo3} (0.43) y \texttt{max\_nivel\_educativo} (-0.39) presentaban las correlaciones más fuertes.
-
-   \item \textbf{Variables categóricas}: El análisis chi-cuadrado reveló asociaciones significativas entre la pobreza y variables como \texttt{Dominio} (V de Cramér = 0.20), \texttt{P5090} (tipo de ocupación de la vivienda, V de Cramér = 0.18) y \texttt{max\_nivel\_educativo} (V de Cramér = 0.24). Estas asociaciones confirmaron la importancia de incluir variables relacionadas con ubicación geográfica, vivienda y capital humano en nuestros modelos.
-\end{enumerate}
-
 \subsection{Selección final de variables}
-
-La selección final de variables para nuestros modelos se basó en tres criterios principales:
-
-\begin{enumerate}
-   \item \textbf{Relevancia predictiva}: Utilizamos las correlaciones con la variable objetivo y los resultados de las pruebas chi-cuadrado para identificar las variables con mayor poder predictivo.
-
-   \item \textbf{Disponibilidad en datos de prueba}: Garantizamos que todas las variables seleccionadas estuvieran disponibles tanto en el conjunto de entrenamiento como en el de prueba.
-
-   \item \textbf{Parsimonia}: Buscamos un conjunto reducido de variables que maximizara el poder predictivo y minimizara la complejidad.
-\end{enumerate}
-
-Eliminamos variables con más del 33\% de valores faltantes, a menos que mostraran una fuerte asociación con la variable objetivo. También evaluamos la redundancia entre variables, eliminando aquellas que presentaban correlaciones muy altas entre sí ($>$0.7), manteniendo la que mostraba mayor asociación con la pobreza.
-
-El conjunto final de variables seleccionadas incluyó características demográficas del hogar (número y composición de miembros), variables de capital humano (nivel educativo y afiliación a seguridad social), características laborales (distribución por grupos de ocupación, horas trabajadas) y características específicas del jefe de hogar. Esta selección equilibrada nos permitió construir modelos robustos y parsimoniosos para la predicción de pobreza.
 
 \section{Modelos y Resultados}
 
@@ -282,77 +149,16 @@ El conjunto final de variables seleccionadas incluyó características demográf
 
 \subsubsection{Metodología}
 
-\paragraph{1. Regresión Logística}
-
-Esta primera metodología estima la probabilidad de que una observación pertenezca a una clase (por ejemplo, "pobre" como en este caso) en función de una combinación lineal de las variables independientes. Esta combinación se transforma usando la función de distribución de probabilidad logística, lo que garantiza que los valores estimados estén entre 0 y 1. Aunque no tiene muchos hiperparámetros, en este trabajo se utilizó la metodología de validación cruzada para ajustar el umbral de clasificación (por ejemplo, elegir si se clasifica como "pobre" cuando la probabilidad es mayor a 0.5 o a otro valor), además de evaluar su capacidad predictiva comparado con modelos más complejos. La forma funcional básico de dicho modelo es:
-
-$$P\left( y = 1 \middle| X \right) = \frac{1}{1 + e^{- (\beta_{0} + \beta_{1 + \ldots + \beta_{k}})}}$$
-
-\paragraph{2. Elastic Net}
-
-Este modelo es una variante penalizada de la regresión logística que incluye regularización mediante una combinación de Lasso (penalización L1) y Ridge (penalización L2). Es útil cuando hay muchas variables correlacionadas o cuando se busca reducir el número de variables relevantes. Los hiperparámetros clave son lambda (intensidad de la penalización) y alpha (mezcla entre L1 y L2). Ambos se seleccionaron con validación cruzada, evaluando el rendimiento del modelo en diferentes combinaciones para elegir la más adecuada. La forma funcional de este modelo es:
-
-$$LOSS = - \log(\beta) + \rho( \propto \sum_{}^{}\left| \beta_{j} \right| + (1 - \propto )\sum_{}^{}\beta_{j}^{2})$$
-
-\paragraph{3. Árboles de Clasificación (CART)}
-
-Este método construye un árbol de decisión dividiendo el conjunto de datos en subconjuntos más homogéneos según los valores de las variables. En cada nodo, el esta metodologia selecciona la variable y el punto de corte que maximizan la separación entre clases. Aunque es muy fácil de interpretar, un solo árbol puede sobreajustarse a los datos si es muy profundo o si se permite dividir con pocos datos. Por eso, se utilizó validación cruzada para determinar la profundidad óptima del árbol, el número mínimo de observaciones por nodo y el parámetro de complejidad que regula la poda del árbol.
-
-\paragraph{4. GBM (Gradient Boosting Machines)}
-
-GBM (Gradient Boosting Machines) es una técnica avanzada de Boosting utilizada para mejorar la precisión de los modelos predictivos, especialmente en problemas de clasificación y regresión. A diferencia de los métodos tradicionales de Boosting, GBM utiliza el gradiente descendente para minimizar la función de error, lo que permite que el modelo ajuste las predicciones de manera más eficiente.
-
-\paragraph{5. Naive Bayes}
-
-Naive Bayes es un clasificador probabilístico basado en el teorema de Bayes, que asume independencia condicional entre las variables predictoras. Aunque esta suposición es bastante fuerte, el modelo suele funcionar sorprendentemente bien en la práctica, especialmente cuando las variables tienen efectos independientes. No requiere un ajuste intensivo de hiperparámetros, pero aun así se utilizó validación cruzada para evaluar su desempeño y compararlo con los otros modelos. Para calcular dichas probabilidades de pertenecer a una clase u otra se utiliza la siguiente formula:
-
-$$P\left( Y \middle| X_{1},X_{2},\ldots,X_{k} \right) = P(Y)\prod_{}^{}{P(X_{J}|Y)}$$
-
-Donde esto es posible dado el supuesto de independencias de las variables.
-
 \subsubsection{Variables utilizadas}
-A continuación se presentan las principales variables utilizadas en los modelos, como se puede observar en la Tabla \ref{tab:03_variables_modelos} del Anexo 3.
 
 \subsection{Resultados}
 
-A continuación se presentan los principales resultados con las metodologías anteriormente explicas, cabe resaltar que al ser una muestra de la población presenta un desbalance entre clases, pero afortunamente los mismos microdatos ayudan a resolver esto mediante un factor de expansión que no es mas que pesos muestrales que ayudan a corregir este problema.
-
-Los resultados de la Tabla \ref{tab:04_tabla_logit} del Anexo 4 corresponden a las estimaciones del modelo Logit, los resultados muestran que variables como el hacinamiento, pertenecer al régimen subsidiado de salud y trabajar en empresas pequeñas están asociadas positivamente con la probabilidad de ser pobre, mientras que contar con educación, estar trabajando, cotizar a pensión y ser pensionado reducen significativamente dicha probabilidad. Por ejemplo, cotizar a pensión o tener mayor nivel educativo parece ser un factor protector frente a la pobreza, mientras que vivir en condiciones de hacinamiento o depender de subsidios refleja situaciones de vulnerabilidad estos resultados hay que interpretarlos de manera cuidadosa ya que no necesariamente representan una relación causal. Algunos coeficientes presentan magnitudes muy elevadas (como los de TGP o CotizaPension), lo cual puede estar relacionado con problemas de escalamiento o multicolinealidad, especialmente dado el tamaño de la muestra. A pesar de ello, la mayoría de las variables son altamente significativas y la reducción en la varianza residual sugiere que el modelo tiene un buen ajuste en comparación con uno sin predictores.
-
-Los resultados de la Tabla \ref{tab:05_tabla_1_cart} del Anexo 5 corresponden a la metodología CARTs, resultados muestran que, en promedio, el modelo alcanzó una precisión del 81.5\% con una desviación estándar baja (0.17\%), lo que sugiere que el modelo es bastante estable entre las diferentes particiones de la muestra. El coeficiente Kappa, que mide la concordancia ajustada por azar, tuvo un valor medio de 0.47, lo cual indica un nivel de acierto moderado entre las predicciones del modelo y la realidad. A pesar de que los valores máximos de precisión alcanzaron hasta 83.4\% y el Kappa llegó a 0.54, los valores mínimos fueron cercanos al 81.2\% y 0.46, lo que sugiere que el modelo no presenta grandes variaciones entre distintas configuraciones que dicha metodología contempló. Estos resultados indican que el árbol de decisión logró capturar patrones relevantes para predecir la pobreza con un buen nivel de precisión.. Una aclaración importe es que este fue el único modelo que se estimo con todas las variables, el resto fueron estimados siguiendo otra especificación (Pobre \~ hacinamiento + r\_gast+ hacinamiento\_c + TGP +educ\_cab +trabajando +CotizaPension + Subsidiado + Pequena + Subsidios + CotizaPension + Pensionado + Ingresos\_AlquilerPensiones + OtrosIngresos) esto debido a que no todas las variables aportaban poder explicativo.
-
-La Tabla \ref{tab:06_tabla_2_cart} del Anexo 6 representa otra estimación bajo metodología CARTS pero con otra especificación, también ajustado mediante validación cruzada, presenta resultados consistentes en cuanto a precisión y estabilidad. El valor promedio de precisión (Accuracy) fue de 81.2\%, con una desviación estándar baja (0.24\%), lo que indica que el modelo mantiene un rendimiento estable al aplicarse sobre distintas particiones de la muestra. El coeficiente de Kappa promedio fue de 0.46, lo cual representa un acuerdo moderado entre las predicciones del modelo y la clasificación real al igual que la especificación anterior. Aunque los valores máximos de precisión y Kappa alcanzaron 82.5\% y 0.50 respectivamente, los mínimos estuvieron en torno al 80.9\% y 0.45, lo que muestra que el rendimiento es bastante homogéneo a lo largo de los diferentes valores del hiperparámetro cp. En general, estos resultados refuerzan que el árbol de decisión logra capturar patrones relevantes para identificar condiciones de pobreza, aunque no presento grandes diferencias ante el cambio deespecificación.
-
-La Tabla \ref{tab:07_tabla_elastic_net} del Anexo 7 por su parte utilizó la metodología de Elastic Net. Los resultados muestran una variabilidad en los valores de precisión (Accuracy) y Kappa en función de los hiperparámetros alpha y lambda. En promedio, la precisión del modelo fue de 80.45\%, con una desviación estándar de 0.12\%, lo que sugiere que el rendimiento del modelo es relativamente consistente a través de las diferentes particiones de la muestra. A lo largo del rango de alpha (que varió de 0.10 a 1.00) y lambda (desde 0.00017 hasta 0.13491), la precisión mostró poca variación, manteniéndose cercana al 81\% en los percentiles 1,2 y 3, lo que indica un buen ajuste del modelo. La tendencia en la precisión y el Kappa sugiere que la regularización aplicada por Elastic Net ayudó a controlar el sobreajuste sin perder mucho rendimiento, lo cual es positivo para problemas de alta dimensionalidad o multicolinealidad. En resumen, el modelo Elastic Net ofrece un buen balance entre precisión y estabilidad, con una capacidad moderada de clasificación, que es acorde a la magnitud de las variables involucradas.
-
-La Tabla \ref{tab:08_tabla_naive_bayes} del Anexo 8 presenta los resultados del modelo ajustado por la metodología de Naive Bayes que fue ajustado con los hiperparámetros alpha y lambda. Los resultados indican que, en promedio, el modelo alcanzó una precisión (Accuracy) de 80.45\%, con una desviación estándar de 0.12\%, lo que indica una precisión bastante estable entre las particiones de la muestra. El coeficiente Kappa promedio fue de 0.38, la precisión se mantuvo relativamente constante, alcanzando un máximo de 81.31\% y un Kappa de 0.45. Los valores de precisión en el primer y tercer cuartil se mantienen alrededor de 80.7\% y 81.3\%, lo que sugiere que el modelo es robusto y no presenta grandes variaciones al ajustar los hiperparámetros. En cuanto a la desviación estándar de precisión, los valores son bajos, lo que refleja la estabilidad del modelo a través de las particiones de la muestra. En resumen, el modelo Naive Bayes parece ser efectivo para este conjunto de datos, logrando una buena precisión con una moderada capacidad de discriminación, y su rendimiento se mantiene estable a pesar de la variación en los hiperparámetros.
-
-La Tabla \ref{tab:09_tabla_gbm} del Anexo 9 muestra las estimaciones del modelo mediante boosting, con los hiperparámetros shrinkage, interaction.depth, minobsinnode, y n.trees. Los resultados muestran una variabilidad en la precisión (Accuracy) y el coeficiente Kappa en función de los valores de los hiperparámetros. La precisión promedio fue de 78.86\%, con una desviación estándar baja (0.11\%). Al analizar los percentiles, la precisión alcanzó un máximo de 82.33\%, con un Kappa de 0.49 en el cuartil superior, lo que muestra que con valores de shrinkage y interaction.depth más altos, el modelo logra una mayor capacidad discriminativa. Por otro lado, los valores mínimos de precisión y Kappa fueron bastante bajos (74.86\% y 0.00, respectivamente), lo que refleja que con configuraciones subóptimas de los hiperparámetros, el modelo no logró un buen rendimiento. La mediana de precisión fue de 79.72\%, lo que indica que el modelo con una configuración intermedia de hiperparámetros proporciona un rendimiento razonablemente bueno y estable. Además, la desviación estándar de la precisión fue muy baja (cerca de 0.0004), lo que refuerza la estabilidad del modelo. En resumen, el modelo ajustado por boosting parece ser bastante efectivo, logrando buenos niveles de precisión y Kappa, especialmente con configuraciones más altas en los hiperparámetros shrinkage e interaction.depth, lo cual podría indicar que el modelo está aprovechando mejor las interacciones no lineales entre las variables.
 
 \subsection{Matrices de Confusión}
 
-A continuación, se presentan las matrices de confusión para los diferentes modelos evaluados:
-
-En la Tabla \ref{tab:10_matriz_1_cart} del Anexo 10 se muestra la matriz de confusión para el primer modelo CART.
-
-En la Tabla \ref{tab:11_matriz_2_cart} del Anexo 11 se presenta la matriz de confusión para el segundo modelo CART.
-
-La Tabla \ref{tab:12_matriz_elastic_net} del Anexo 12 contiene la matriz de confusión para el modelo Elastic Net.
-
-La matriz de confusión para el modelo de regresión logística se puede observar en la Tabla \ref{tab:13_matriz_logit} del Anexo 13.
-
-Los resultados de la matriz de confusión para el modelo Naive Bayes se encuentran en la Tabla \ref{tab:14_matriz_naive_bayes} del Anexo 14.
-
-Finalmente, la matriz de confusión para el modelo GBM se presenta en la Tabla \ref{tab:15_matriz_gbm} del Anexo 15.
 
 \section{Conclusión}
 
-Este estudio buscó estimar la pobreza utilizando técnicas de Big Data y algoritmos de aprendizaje automático aplicados con datos de “Empalme de las Series de Empleo, Pobreza y Desigualdad – MESE”. A pesar de las limitaciones inherentes al problema, se logró un desempeño razonable, alcanzando un F1-score de 0.56. El modelo con mejor rendimiento fue XGBoost, gracias a su capacidad para capturar relaciones no lineales y su potencia en términos de regularización y ajuste fino de parámetros \cite{huang2025unveiling}.
-Uno de los principales aprendizajes de este ejercicio fue la estrategia utilizada para la imputación de datos faltantes. Se optó por imputar con la media en variables numéricas y con la moda en variables categóricas, una técnica sencilla de implementar, eficiente en términos computacionales y útil para mantener el tamaño original del conjunto de datos. Además, esta estrategia no altera la escala de las variables, lo que facilita la aplicación de diversos algoritmos de Machine Learning sin necesidad de ajustes adicionales.
-
-El resultado obtenido también evidencia oportunidades de mejora significativas. Para incrementar la precisión del modelo y lograr métricas más robustas, es fundamental avanzar en la selección de variables más relevantes y explorar con mayor profundidad la sintonización de hiperparámetros. Como han señalado \cite{karmaker2025machine}, la identificación precisa de los determinantes socioeconómicos es clave para fortalecer la capacidad predictiva de los modelos de pobreza, especialmente en contextos donde los recursos y las políticas deben dirigirse de manera efectiva.
-
-En conclusión, aunque los resultados obtenidos son alentadores, el desarrollo de modelos más precisos y accionables para la predicción de la pobreza requiere una combinación de mejoras técnicas, refinamiento metodológico.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ANEXOS
@@ -363,50 +169,12 @@ En conclusión, aunque los resultados obtenidos son alentadores, el desarrollo d
 \section*{Anexos}
 \addcontentsline{toc}{section}{Anexos}
 
-\section{Estadísticas descriptivas de variables continuas}
-\input{../views/tables/01_descriptiva_personas_continua.tex}
+%\section{Estadísticas descriptivas de variables continuas}
+%\input{../views/tables/01_descriptiva_personas_continua.tex}
 
-\section{Estadísticas descriptivas de variables discretas}
-\input{../views/tables/02_descriptiva_personas_discreta.tex}
+%\section{Estadísticas descriptivas de variables discretas}
+%\input{../views/tables/02_descriptiva_personas_discreta.tex}
 
-\section{Variables utilizadas en los modelos}
-\input{../views/tables/03_variables_modelos.tex}
-
-\section{Estimaciones mediante metodología LOGIT}
-\input{../views/tables/04_tabla_logit.tex}
-
-\section{Estimación 1 metodología CARTs}
-\input{../views/tables/05_tabla_1_cart.tex}
-
-\section{Estimación 2 metodología CARTs}
-\input{../views/tables/06_tabla_2_cart.tex}
-
-\section{Estimaciones por Elastic Net}
-\input{../views/tables/07_tabla_elastic_net.tex}
-
-\section{Estimaciones por Naive Bayes}
-\input{../views/tables/08_tabla_naive_bayes.tex}
-
-\section{Estimaciones por GBM}
-\input{../views/tables/09_tabla_gbm.tex}
-
-\section{Matriz de confusión - Modelo CART 1}
-\input{../views/tables/10_matriz_1_cart.tex}
-
-\section{Matriz de confusión - Modelo CART 2}
-\input{../views/tables/11_matriz_2_cart.tex}
-
-\section{Matriz de confusión - Modelo Elastic Net}
-\input{../views/tables/12_matriz_elastic_net.tex}
-
-\section{Matriz de confusión - Modelo Logit}
-\input{../views/tables/13_matriz_logit.tex}
-
-\section{Matriz de confusión - Modelo Naive Bayes}
-\input{../views/tables/14_matriz_naive_bayes.tex}
-
-\section{Matriz de confusión - Modelo GBM}
-\input{../views/tables/15_matriz_gbm.tex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TERMINA EL CONTENIDO
