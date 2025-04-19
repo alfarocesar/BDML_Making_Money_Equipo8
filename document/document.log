@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2025.2.23)  17 APR 2025 14:53
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2025.2.23)  18 APR 2025 18:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -688,9 +688,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 [2]
 
-[3]
-
-[4
+[3
 
 ]
 No file document.bbl.
@@ -703,21 +701,21 @@ LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `document.out' has not changed.
-(rerunfilecheck)             Checksum: 7A4CAB7F016A9933AFE54DA154CBBAA0;3938.
+(rerunfilecheck)             Checksum: CA62A8EE72840E27206E11E44543232D;2537.
  ) 
 Here is how much of TeX's memory you used:
- 16322 strings out of 475113
- 262602 string characters out of 5762667
- 686966 words of memory out of 5000000
- 39059 multiletter control sequences out of 15000+600000
+ 16309 strings out of 475113
+ 262356 string characters out of 5762667
+ 685966 words of memory out of 5000000
+ 39053 multiletter control sequences out of 15000+600000
  571434 words of font info for 65 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  75i,5n,79p,386b,584s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1728.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1095.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1440.600pk> </Users/cesaralfaro/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx2074.600pk>
-Output written on document.pdf (4 pages, 74617 bytes).
+Output written on document.pdf (3 pages, 71021 bytes).
 PDF statistics:
- 370 PDF objects out of 1000 (max. 8388607)
- 144 compressed objects within 2 object streams
- 25 named destinations out of 1000 (max. 500000)
- 169 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 332 PDF objects out of 1000 (max. 8388607)
+ 115 compressed objects within 2 object streams
+ 18 named destinations out of 1000 (max. 500000)
+ 121 words of extra memory for PDF output out of 10000 (max. 10000000)
 
