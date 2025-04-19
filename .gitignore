@@ -47,3 +47,17 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Project specific
+# Data files
+stores/raw/*
+!stores/raw/README.md
+stores/processed/*
+!stores/processed/README.md
+
+# Temporary files
+*.temp
+*.tmp
+~$*
+*.bak
+*.swp
