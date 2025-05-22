@@ -169,3 +169,7 @@ cat("📁 Archivos generados:\n")
 cat("   - stores/processed/train_vars_texto.csv\n")
 cat("   - stores/processed/test_vars_texto.csv\n")
 cat("📊 Variables creadas: nivel_premium, nivel_completitud, nivel_venta_inmediata\n")
+
+################################################################################
+#                            FIN DEL SCRIPT                                   #
+################################################################################
