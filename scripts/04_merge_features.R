@@ -36,7 +36,119 @@ train_text <- read_csv("stores/processed/train_vars_texto.csv")
 test_text  <- read_csv("stores/processed/test_vars_texto.csv")
 
 ################################################################################
-# 2. COMBINACIÓN DE DATASETS                                                  #
+# 2. VALIDACIONES PRE-MERGE                                                   #
+################################################################################
+
+cat("Ejecutando validaciones pre-merge...\n")
+
+# 2.1 Verificación de consistencia de IDs
+cat(" - Verificando consistencia de property_ids...\n")
+
+datasets <- list(
+  "train_clean" = train_clean,
+  "test_clean" = test_clean,
+  "train_spatial" = train_spatial,
+  "test_spatial" = test_spatial,
+  "train_text" = train_text,
+  "test_text" = test_text
+)
+
+# Verificar que todos tengan property_id
+for (name in names(datasets)) {
+  if (!"property_id" %in% colnames(datasets[[name]])) {
+    stop(paste("ERROR:", name, "no tiene columna property_id"))
+  }
+}
+
+# Verificar consistencia para train
+ids_train_clean <- train_clean$property_id
+ids_train_spatial <- train_spatial$property_id
+ids_train_text <- train_text$property_id
+
+missing_spatial_train <- setdiff(ids_train_clean, ids_train_spatial)
+missing_text_train <- setdiff(ids_train_clean, ids_train_text)
+
+if (length(missing_spatial_train) > 0) {
+  cat("   ADVERTENCIA: ", length(missing_spatial_train), " IDs de train no están en spatial\n")
+}
+if (length(missing_text_train) > 0) {
+  cat("   ADVERTENCIA: ", length(missing_text_train), " IDs de train no están en text\n")
+}
+
+# Verificar consistencia para test
+ids_test_clean <- test_clean$property_id
+ids_test_spatial <- test_spatial$property_id
+ids_test_text <- test_text$property_id
+
+missing_spatial_test <- setdiff(ids_test_clean, ids_test_spatial)
+missing_text_test <- setdiff(ids_test_clean, ids_test_text)
+
+if (length(missing_spatial_test) > 0) {
+  cat("   ADVERTENCIA: ", length(missing_spatial_test), " IDs de test no están en spatial\n")
+}
+if (length(missing_text_test) > 0) {
+  cat("   ADVERTENCIA: ", length(missing_text_test), " IDs de test no están en text\n")
+}
+
+# 2.2 Validación de tipos de datos
+cat(" - Verificando tipos de datos...\n")
+
+# Verificar tipos esperados en datasets clean
+expected_types <- list(
+  "property_id" = "character",
+  "price" = "numeric",
+  "bedrooms" = "numeric", 
+  "antiguedad" = "numeric",
+  "is_house" = "numeric"
+)
+
+for (dataset_name in c("train_clean", "test_clean")) {
+  dataset <- datasets[[dataset_name]]
+  for (var_name in names(expected_types)) {
+    if (var_name %in% colnames(dataset)) {
+      actual_type <- class(dataset[[var_name]])[1]
+      expected_type <- expected_types[[var_name]]
+      if (actual_type != expected_type) {
+        cat("   ADVERTENCIA:", dataset_name, "-", var_name, "es", actual_type, 
+            "pero se esperaba", expected_type, "\n")
+      }
+    }
+  }
+}
+
+# Verificar que variables espaciales sean numéricas
+spatial_datasets <- list("train_spatial" = train_spatial, "test_spatial" = test_spatial)
+for (dataset_name in names(spatial_datasets)) {
+  dataset <- spatial_datasets[[dataset_name]]
+  spatial_vars <- setdiff(colnames(dataset), "property_id")
+  for (var in spatial_vars) {
+    var_type <- class(dataset[[var]])[1]
+    if (!var_type %in% c("numeric", "double", "integer")) {
+      stop(paste("ERROR:", dataset_name, "-", var, "debe ser numérica pero es", var_type))
+    }
+  }
+}
+
+# 2.3 Detección de duplicados
+cat(" - Detectando duplicados...\n")
+
+for (name in names(datasets)) {
+  dataset <- datasets[[name]]
+  if ("property_id" %in% colnames(dataset)) {
+    total_rows <- nrow(dataset)
+    unique_ids <- n_distinct(dataset$property_id)
+    duplicates <- total_rows - unique_ids
+    
+    if (duplicates > 0) {
+      stop(paste("ERROR:", name, "tiene", duplicates, "property_ids duplicados"))
+    }
+  }
+}
+
+cat(" - Validaciones completadas exitosamente\n")
+
+################################################################################
+# 3. COMBINACIÓN DE DATASETS                                                  #
 ################################################################################
 
 cat("Combinando datasets de entrenamiento...\n")
@@ -52,7 +164,7 @@ test_final <- test_clean %>%
   left_join(test_text, by = "property_id")
 
 ################################################################################
-# 3. VERIFICACIÓN Y RESUMEN                                                   #
+# 4. VERIFICACIÓN Y RESUMEN                                                   #
 ################################################################################
 
 cat("Dimensiones finales:\n")
@@ -64,7 +176,7 @@ cat(" - IDs únicos en train:", n_distinct(train_final$property_id), "\n")
 cat(" - IDs únicos en test :", n_distinct(test_final$property_id), "\n")
 
 ################################################################################
-# 4. GUARDAR RESULTADOS                                                       #
+# 5. GUARDAR RESULTADOS                                                       #
 ################################################################################
 
 output_dir <- "stores/processed"
@@ -78,7 +190,7 @@ cat(" - stores/processed/train_merged.csv\n")
 cat(" - stores/processed/test_merged.csv\n")
 
 ################################################################################
-# 5. DICCIONARIO DE VARIABLES DEL DATASET COMBINADO                           #
+# 6. DICCIONARIO DE VARIABLES DEL DATASET COMBINADO                           #
 ################################################################################
 
 # VARIABLES PROVENIENTES DE LA LIMPIEZA INICIAL (01_data_cleaning.R)
