@@ -244,3 +244,7 @@ cat("- stores/processed/test_vars_espacial.csv (", nrow(test_vars), " observacio
 # Nota metodológica: Las variables espaciales capturan amenidades urbanas que 
 # teóricamente influyen en el valor de las propiedades según la literatura de 
 # precios hedónicos (Rosen, 1974).
+
+################################################################################
+#                            FIN DEL SCRIPT                                   #
+################################################################################
