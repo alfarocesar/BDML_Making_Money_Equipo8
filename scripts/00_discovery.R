@@ -313,3 +313,7 @@ A continuación, se documentan las decisiones tomadas para cada una de las varia
 - title (character): No se utilizará directamente debido a que presenta aproximadamente un 24% de valores faltantes en el conjunto de prueba.
 - description (character): Se utilizará para generar nuevas variables de texto a través de procesamiento de lenguaje natural (NLP).
 ")
+
+################################################################################
+#                            FIN DEL SCRIPT                                   #
+################################################################################
