@@ -611,13 +611,27 @@ create_frequency_distributions <- function(stats_list) {
     
     if("distribucion" %in% names(stat_data)) {
       dist_data <- stat_data$distribucion
+      
+      # Estandarizar nombres de columnas
+      if("Valor" %in% names(dist_data)) {
+        names(dist_data)[names(dist_data) == "Valor"] <- "categoria"
+      } else if("Nivel" %in% names(dist_data)) {
+        names(dist_data)[names(dist_data) == "Nivel"] <- "categoria"
+      }
+      
+      # Convertir categoria a character para consistencia
+      if("categoria" %in% names(dist_data)) {
+        dist_data$categoria <- as.character(dist_data$categoria)
+      }
+      
+      # Añadir información del dataset
       dist_data$dataset <- stat_data$dataset
       dist_data$variable <- stat_data$variable
       dist_data$tipo <- stat_data$tipo
       
       # Reordenar columnas
       dist_data <- dist_data %>%
-        select(dataset, variable, tipo, everything())
+        select(dataset, variable, tipo, categoria, everything())
       
       all_distributions[[stat_name]] <- dist_data
     }
@@ -627,13 +641,27 @@ create_frequency_distributions <- function(stats_list) {
        !"Nota" %in% names(stat_data$frecuencias)) {
       
       freq_data <- stat_data$frecuencias
+      
+      # Estandarizar nombres de columnas
+      if("Categoria" %in% names(freq_data)) {
+        names(freq_data)[names(freq_data) == "Categoria"] <- "categoria"
+      } else if("Valor" %in% names(freq_data)) {
+        names(freq_data)[names(freq_data) == "Valor"] <- "categoria"
+      }
+      
+      # Convertir categoria a character para consistencia
+      if("categoria" %in% names(freq_data)) {
+        freq_data$categoria <- as.character(freq_data$categoria)
+      }
+      
+      # Añadir información del dataset
       freq_data$dataset <- stat_data$dataset
       freq_data$variable <- stat_data$variable
       freq_data$tipo <- stat_data$tipo
       
       # Reordenar columnas
       freq_data <- freq_data %>%
-        select(dataset, variable, tipo, everything())
+        select(dataset, variable, tipo, categoria, everything())
       
       all_distributions[[stat_name]] <- freq_data
     }
@@ -755,14 +783,18 @@ cat("\nAnálisis completado exitosamente.\n")
 # ---------------------------
 # Contiene las distribuciones de frecuencias para variables discretas y categóricas
 # que tienen un número manejable de categorías/valores únicos.
-# Columnas principales:
+# Columnas estandarizadas:
 # - dataset: "train" o "test"
 # - variable: Nombre de la variable
 # - tipo: Tipo de variable
-# - Columnas específicas según el tipo de variable:
-#   * Para discretas: Valor, Frecuencia, Porcentaje
-#   * Para categóricas: Categoria, Frecuencia, Porcentaje
-#   * Para ordinales: Nivel, Frecuencia, Porcentaje
+# - categoria: Valor/categoría (estandarizado como character)
+# - Frecuencia: Conteo absoluto
+# - Porcentaje: Porcentaje del total (redondeado a 2 decimales)
+# 
+# NOTA: La columna 'categoria' unifica los nombres originales:
+# - 'Valor' (para variables discretas y binarias)
+# - 'Nivel' (para variables ordinales)
+# - 'Categoria' (para variables categóricas)
 
 # NOTAS IMPORTANTES:
 # - Todos los archivos están en formato CSV para fácil importación
