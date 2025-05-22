@@ -267,3 +267,8 @@ cat("   Test:", ncol(test_clean), "variables,", nrow(test_clean), "observaciones
 
 cat("Proceso de limpieza completado exitosamente.\n")
 cat("Los archivos CSV están listos para el siguiente paso del pipeline.\n")
+
+
+################################################################################
+#                            FIN DEL SCRIPT                                   #
+################################################################################
