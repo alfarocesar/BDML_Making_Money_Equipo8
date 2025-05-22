@@ -96,8 +96,8 @@ procesar_datos <- function(datos) {
 #                      Importar y procesar los datasets                        #
 ################################################################################
 
-train <- read_csv("data/train.csv")
-test <- read_csv("data/test.csv")
+train <- read_csv("stores/raw/train.csv")
+test <- read_csv("stores/raw/test.csv")
 
 train_vars_texto <- procesar_datos(train)
 test_vars_texto <- procesar_datos(test)
