@@ -22,7 +22,9 @@ pacman::p_load(
   workflows,    # Flujos de trabajo
   yardstick,    # Métricas de evaluación
   dials,        # Grillas de parámetros
-  workflowsets  # Conjuntos de flujos de trabajo
+  workflowsets, # Conjuntos de flujos de trabajo
+  spatialsample,# Validación cruzada espacial
+  sf            # Datos espaciales
 )
 
 # Fijar semilla para reproducibilidad
@@ -38,6 +40,11 @@ test <- read_csv("stores/processed/test_merged.csv")
 
 cat("Dimensiones train:", dim(train), "\n")
 cat("Dimensiones test:", dim(test), "\n")
+
+# Verificar que lat/lon están presentes
+if (!all(c("lat", "lon") %in% names(train))) {
+  stop("Las variables lat y lon son requeridas para validación cruzada espacial")
+}
 
 # Imputar valores faltantes en variables de texto con 0
 variables_texto <- c("nivel_premium", "nivel_completitud", "nivel_venta_inmediata")
@@ -65,7 +72,7 @@ test %>%
   summarise_all(~sum(is.na(.))) %>% 
   print()
 
-# Remover property_id de las variables predictoras
+# Remover property_id, lat, lon de las variables predictoras (pero mantener lat/lon en el dataset)
 train_features <- train %>% select(-property_id)
 test_features <- test %>% select(-property_id, -price) # Remover price si existe en test
 
@@ -76,16 +83,16 @@ cat(names(train_features), "\n")
 # 2. ESPECIFICACIÓN DE RECETAS           #
 ###########################################
 
-# Receta 1: Modelo básico con todas las variables
-rec_1 <- recipe(price ~ ., data = train_features) %>%
+# Receta 1: Modelo básico con todas las variables (excluyendo lat/lon de la fórmula)
+rec_1 <- recipe(price ~ ., data = train_features %>% select(-lat, -lon)) %>%
   step_zv(all_predictors()) %>%                    # Remover variables con varianza cero
   step_normalize(all_numeric_predictors()) %>%     # Normalizar variables numéricas
   step_dummy(all_nominal_predictors()) %>%        # Crear dummies para categóricas
   step_interact(terms = ~ starts_with("distancia"):is_house) %>%  # Interacciones espaciales
   step_nzv(all_predictors())                      # Remover predictores near-zero variance
 
-# Receta 2: Modelo con términos polinómicos y más interacciones
-rec_2 <- recipe(price ~ ., data = train_features) %>%
+# Receta 2: Modelo con términos polinómicos y más interacciones (excluyendo lat/lon de la fórmula)
+rec_2 <- recipe(price ~ ., data = train_features %>% select(-lat, -lon)) %>%
   step_zv(all_predictors()) %>%
   step_normalize(all_numeric_predictors()) %>%
   step_dummy(all_nominal_predictors()) %>%
@@ -131,19 +138,30 @@ workflow_2 <- workflow() %>%
   add_model(elastic_net_spec)
 
 ###########################################
-# 5. VALIDACIÓN CRUZADA Y TUNING         #
+# 5. VALIDACIÓN CRUZADA ESPACIAL Y TUNING#
 ###########################################
 
-# Configurar validación cruzada 5-fold
+# Convertir datos de entrenamiento a formato sf
+cat("Configurando validación cruzada espacial...\n")
+train_sf <- st_as_sf(
+  train_features,
+  coords = c("lon", "lat"),  # lon va primero según convención
+  crs = 4326  # Sistema de coordenadas WGS84
+)
+
+# Crear bloques espaciales para validación cruzada
 set.seed(123)
-cv_folds <- vfold_cv(train_features, v = 5, strata = price)
+block_folds <- spatial_block_cv(train_sf, v = 5)
+
+cat("Bloques espaciales creados:\n")
+print(block_folds)
 
 cat("Iniciando tuning de hiperparámetros para Workflow 1...\n")
 # Tuning Workflow 1
 set.seed(123)
 tune_res1 <- tune_grid(
   workflow_1,
-  resamples = cv_folds,
+  resamples = block_folds,
   grid = grid_values,
   metrics = metric_set(rmse, mae, rsq),
   control = control_grid(verbose = TRUE)
@@ -154,7 +172,7 @@ cat("Iniciando tuning de hiperparámetros para Workflow 2...\n")
 set.seed(123)
 tune_res2 <- tune_grid(
   workflow_2,
-  resamples = cv_folds,
+  resamples = block_folds,
   grid = grid_values,
   metrics = metric_set(rmse, mae, rsq),
   control = control_grid(verbose = TRUE)
@@ -187,10 +205,10 @@ final_workflow_2 <- finalize_workflow(workflow_2, best_params_2)
 
 # Ajustar modelos finales en todo el conjunto de entrenamiento
 cat("Ajustando modelo final 1...\n")
-final_fit_1 <- fit(final_workflow_1, data = train_features)
+final_fit_1 <- fit(final_workflow_1, data = train_features %>% select(-lat, -lon))
 
 cat("Ajustando modelo final 2...\n")
-final_fit_2 <- fit(final_workflow_2, data = train_features)
+final_fit_2 <- fit(final_workflow_2, data = train_features %>% select(-lat, -lon))
 
 ###########################################
 # 7. PREDICCIONES Y EXPORTACIÓN          #
@@ -201,10 +219,10 @@ if (!dir.exists("stores/submissions")) {
   dir.create("stores/submissions", recursive = TRUE)
 }
 
-# Realizar predicciones
+# Realizar predicciones (excluyendo lat/lon de los datos de test)
 cat("Generando predicciones...\n")
-predictions_1 <- predict(final_fit_1, new_data = test_features)
-predictions_2 <- predict(final_fit_2, new_data = test_features)
+predictions_1 <- predict(final_fit_1, new_data = test_features %>% select(-lat, -lon))
+predictions_2 <- predict(final_fit_2, new_data = test_features %>% select(-lat, -lon))
 
 # Crear dataframes para submission
 submission_5 <- data.frame(
@@ -226,8 +244,8 @@ write_csv(submission_5, "stores/submissions/submission_5.csv")
 write_csv(submission_6, "stores/submissions/submission_6.csv")
 
 cat("Submissions exportados exitosamente:\n")
-cat("- stores/submissions/submission_5.csv (Modelo Elastic Net básico)\n")
-cat("- stores/submissions/submission_6.csv (Modelo Elastic Net con polinomios)\n")
+cat("- stores/submissions/submission_5.csv (Modelo Elastic Net básico con CV espacial)\n")
+cat("- stores/submissions/submission_6.csv (Modelo Elastic Net con polinomios y CV espacial)\n")
 
 # Mostrar estadísticas de las predicciones
 cat("\nEstadísticas de predicciones:\n")
@@ -248,7 +266,8 @@ model_info <- list(
   workflow_1_metrics = collect_metrics(tune_res1) %>% 
     filter(.config == best_params_1$.config),
   workflow_2_metrics = collect_metrics(tune_res2) %>% 
-    filter(.config == best_params_2$.config)
+    filter(.config == best_params_2$.config),
+  spatial_cv_info = "Validación cruzada espacial con 5 bloques usando spatialsample"
 )
 
 saveRDS(model_info, "stores/models/elastic_net_model_info.rds")
