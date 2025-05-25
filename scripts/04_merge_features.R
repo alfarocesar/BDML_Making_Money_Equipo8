@@ -93,11 +93,13 @@ if (length(missing_text_test) > 0) {
 # 2.2 Validación de tipos de datos
 cat(" - Verificando tipos de datos...\n")
 
-# Verificar tipos esperados en datasets clean
+# Verificar tipos esperados en datasets clean (incluyendo lat y lon)
 expected_types <- list(
   "property_id" = "character",
   "price" = "numeric",
   "bedrooms" = "numeric", 
+  "lat" = "numeric",
+  "lon" = "numeric",
   "antiguedad" = "numeric",
   "is_house" = "numeric"
 )
@@ -157,11 +159,15 @@ train_final <- train_clean %>%
   left_join(train_spatial, by = "property_id") %>%
   left_join(train_text, by = "property_id")
 
+
+
 cat("Combinando datasets de prueba...\n")
 
 test_final <- test_clean %>%
   left_join(test_spatial, by = "property_id") %>%
   left_join(test_text, by = "property_id")
+
+
 
 ################################################################################
 # 4. VERIFICACIÓN Y RESUMEN                                                   #
@@ -174,6 +180,12 @@ cat(" - Test :", dim(test_final), "\n")
 cat("Verificando identificadores únicos...\n")
 cat(" - IDs únicos en train:", n_distinct(train_final$property_id), "\n")
 cat(" - IDs únicos en test :", n_distinct(test_final$property_id), "\n")
+
+cat("Variables en dataset final de entrenamiento:\n")
+cat(paste(" -", names(train_final), collapse = "\n"), "\n")
+
+cat("Variables en dataset final de prueba:\n")
+cat(paste(" -", names(test_final), collapse = "\n"), "\n")
 
 ################################################################################
 # 5. GUARDAR RESULTADOS                                                       #
@@ -198,6 +210,8 @@ cat(" - stores/processed/test_merged.csv\n")
 # property_id              | Identificador único de la propiedad (categórica nominal)
 # price                    | Precio de oferta (numérica continua, solo en train)
 # bedrooms                 | Número de habitaciones (numérica discreta)
+# lat                      | Latitud de la propiedad (numérica continua) - REQUERIDA PARA VALIDACIÓN CRUZADA ESPACIAL
+# lon                      | Longitud de la propiedad (numérica continua) - REQUERIDA PARA VALIDACIÓN CRUZADA ESPACIAL
 # antiguedad              | Meses desde publicación hasta diciembre de 2021 (numérica discreta)
 # is_house                 | Indicador binario: 1 si es casa, 0 si es apartamento (binaria)
 
@@ -219,6 +233,7 @@ cat(" - stores/processed/test_merged.csv\n")
 # - Las variables espaciales se expresan en metros y provienen de OpenStreetMap.
 # - Las variables de texto fueron derivadas del campo `description` original mediante procesamiento léxico.
 # - La variable `price` solo está disponible en el conjunto de entrenamiento y es la variable objetivo.
+# - Las variables `lat` y `lon` son necesarias para la validación cruzada espacial en pasos posteriores del pipeline.
 # - El identificador `property_id` debe conservarse sin transformaciones para garantizar consistencia en el pipeline.
 
 ################################################################################
