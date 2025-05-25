@@ -1,5 +1,5 @@
 ################################################################################
-# TÍTULO: 01_linear_regression.R                                               #
+# TÍTULO: 06_linear_regression.R                                               #
 # PROYECTO: Making Money with ML                                               #
 # DESCRIPCIÓN: Implementación de modelo Linear Regression para predicción     #
 # FECHA: 22 de mayo de 2025                                                   #
