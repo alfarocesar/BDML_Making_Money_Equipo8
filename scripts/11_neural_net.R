@@ -14,9 +14,11 @@ setwd("../")
 # Cargar librerías usando pacman
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-  tidyverse,  # Manipulación de datos
-  caret,      # Para entrenamiento de modelos
-  nnet        # Para neural networks
+  tidyverse,     # Manipulación de datos
+  caret,         # Para entrenamiento de modelos
+  nnet,          # Para neural networks
+  spatialsample, # Para validación cruzada espacial
+  sf             # Para datos espaciales
 )
 
 # Fijar semilla para reproducibilidad
@@ -38,11 +40,12 @@ if(!"price" %in% names(train)) {
   stop("La variable 'price' no se encontró en el dataset de entrenamiento")
 }
 
-# Verificar variables disponibles
+# Verificar variables esperadas (incluyendo coordenadas espaciales)
 variables_esperadas <- c(
   "property_id", "price", "bedrooms", "antiguedad", "is_house",
   "distancia_parque", "distancia_universidad", "distancia_estacion_transporte", 
-  "distancia_zona_comercial", "nivel_premium", "nivel_completitud", "nivel_venta_inmediata"
+  "distancia_zona_comercial", "nivel_premium", "nivel_completitud", "nivel_venta_inmediata",
+  "lat", "lon"
 )
 
 cat("\nVerificando variables esperadas:\n")
@@ -127,7 +130,7 @@ cat("Variables normalizadas exitosamente\n")
 # 4. ESPECIFICACIÓN DEL MODELO           #
 ###########################################
 
-# Definir fórmula del modelo
+# Definir fórmula del modelo (NO incluir lat/lon como predictores)
 model_form <- price ~ bedrooms + antiguedad + is_house + 
   distancia_parque + distancia_universidad + distancia_estacion_transporte + 
   distancia_zona_comercial + nivel_premium + nivel_completitud + nivel_venta_inmediata
@@ -137,13 +140,36 @@ print(model_form)
 
 ###########################################
 # 5. CONFIGURACIÓN DE VALIDACIÓN CRUZADA #
+# ESPACIAL                                #
 ###########################################
 
-# Configurar validación cruzada con grid search para hiperparámetros
+# Convertir datos de entrenamiento a formato sf usando coordenadas lat/lon
+train_sf <- st_as_sf(
+  train_normalized,
+  coords = c("lon", "lat"),
+  crs = 4326
+)
+
+cat("Datos convertidos a formato sf\n")
+
+# Crear bloques espaciales para validación cruzada
+set.seed(123)
+block_folds <- spatial_block_cv(train_sf, v = 5)
+
+cat("Bloques espaciales creados:\n")
+print(block_folds)
+
+# Extraer índices de los bloques espaciales para usar con caret
+folds_indices <- list()
+for(i in 1:5) {
+  folds_indices[[i]] <- block_folds$splits[[i]]$in_id
+}
+
+# Configurar validación cruzada espacial
 ctrl <- trainControl(
-  method = "cv",        # Cross-validation
-  number = 5,           # 5 folds
-  verboseIter = TRUE    # Mostrar progreso
+  method = "cv",            # Cross-validation
+  index = folds_indices,    # Usar índices espaciales
+  verboseIter = TRUE        # Mostrar progreso
 )
 
 # Definir grilla de hiperparámetros para neural network
@@ -161,15 +187,15 @@ print(nnet_grid)
 # 6. ENTRENAMIENTO DEL MODELO            #
 ###########################################
 
-cat("Iniciando entrenamiento del modelo Neural Network...\n")
+cat("Iniciando entrenamiento del modelo Neural Network con validación cruzada espacial...\n")
 
-# Entrenar modelo usando caret con grid search
+# Entrenar modelo usando caret con grid search y validación cruzada espacial
 set.seed(123)
 modelo_nnet <- train(
   model_form,                    # Fórmula del modelo
   data = train_normalized,       # Datos normalizados
   method = 'nnet',              # Neural network
-  trControl = ctrl,             # Configuración de CV
+  trControl = ctrl,             # Configuración de CV espacial
   tuneGrid = nnet_grid,         # Grilla de hiperparámetros
   linout = TRUE,                # Para regresión (salida lineal)
   trace = FALSE,                # No mostrar detalles de entrenamiento
@@ -185,7 +211,7 @@ cat("Mejores hiperparámetros:\n")
 print(modelo_nnet$bestTune)
 
 # Mostrar métricas de validación cruzada
-cat("Métricas de validación cruzada:\n")
+cat("Métricas de validación cruzada espacial:\n")
 print(modelo_nnet$results)
 
 ###########################################
@@ -264,6 +290,7 @@ model_info <- list(
   variable_importance = importance,
   preprocess_params = preprocess_params,
   price_params = price_params,
+  spatial_folds = block_folds,
   date_created = Sys.time()
 )
 
@@ -286,7 +313,7 @@ cat("- De texto: nivel_premium, nivel_completitud, nivel_venta_inmediata\n")
 cat("\nHiperparámetros óptimos:\n")
 cat("Size (neuronas en capa oculta):", modelo_nnet$bestTune$size, "\n")
 cat("Decay (regularización):", modelo_nnet$bestTune$decay, "\n")
-cat("\nMétricas de validación cruzada:\n")
+cat("\nMétricas de validación cruzada espacial:\n")
 best_results <- modelo_nnet$results[
   modelo_nnet$results$size == modelo_nnet$bestTune$size & 
     modelo_nnet$results$decay == modelo_nnet$bestTune$decay, ]
@@ -296,6 +323,7 @@ cat("MAE:", round(best_results$MAE, 2), "\n")
 cat("\nSubmission generado: submission_7.csv\n")
 cat("Observaciones procesadas:", nrow(test), "\n")
 cat("Preprocesamiento: Variables normalizadas (center + scale)\n")
+cat("Validación cruzada: Espacial con bloques (5-fold)\n")
 cat(paste(rep("=", 60), collapse = ""), "\n")
 
 ################################################################################
