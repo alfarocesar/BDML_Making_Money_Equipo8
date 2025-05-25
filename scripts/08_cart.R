@@ -14,10 +14,12 @@ setwd("../")
 # Cargar librerías usando pacman
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-  tidyverse,    # Manipulación de datos
-  caret,        # Para entrenamiento de modelos
-  rpart,        # Para árboles de decisión CART
-  rpart.plot    # Para visualizar árboles
+  tidyverse,      # Manipulación de datos
+  caret,          # Para entrenamiento de modelos
+  rpart,          # Para árboles de decisión CART
+  rpart.plot,     # Para visualizar árboles
+  spatialsample,  # Muestreo espacial para modelos de aprendizaje automático
+  sf              # Leer/escribir/manipular datos espaciales
 )
 
 # Fijar semilla para reproducibilidad
@@ -37,6 +39,11 @@ cat("Dimensiones test:", dim(test), "\n")
 # Verificar que existe la variable precio
 if(!"price" %in% names(train)) {
   stop("La variable 'price' no se encontró en el dataset de entrenamiento")
+}
+
+# Verificar que existen las coordenadas espaciales
+if(!"lat" %in% names(train) || !"lon" %in% names(train)) {
+  stop("Las variables 'lat' y/o 'lon' no se encontraron en el dataset de entrenamiento")
 }
 
 # Mostrar estadísticas básicas de la variable objetivo
@@ -92,6 +99,7 @@ if("is_house" %in% names(train)) {
 ###########################################
 
 # Definir fórmula del modelo usando todas las variables predictoras disponibles
+# (excluyendo property_id, price, lat y lon)
 model_form <- price ~ bedrooms + antiguedad + is_house + 
   distancia_parque + distancia_universidad + distancia_estacion_transporte + 
   distancia_zona_comercial + nivel_premium + nivel_completitud + nivel_venta_inmediata
@@ -101,14 +109,44 @@ print(model_form)
 
 ###########################################
 # 4. CONFIGURACIÓN DE VALIDACIÓN CRUZADA #
+# ESPACIAL                                #
 ###########################################
 
-# Configurar validación cruzada siguiendo el patrón de los cuadernos
+# Convertir datos de entrenamiento a formato sf siguiendo el patrón de los cuadernos
+train_sf <- st_as_sf(
+  train,
+  # "coords" is in x/y order -- so longitude goes first!
+  coords = c("lon", "lat"),
+  # Set our coordinate reference system to EPSG:4326,
+  # the standard WGS84 geodetic coordinate reference system
+  crs = 4326
+)
+
+cat("Datos convertidos a formato sf\n")
+cat("Dimensiones train_sf:", dim(train_sf), "\n")
+
+# Crear bloques espaciales siguiendo el patrón de los cuadernos
+set.seed(123)
+block_folds <- spatial_block_cv(train_sf, v = 5)
+
+cat("Bloques espaciales creados:\n")
+print(block_folds)
+
+# Extraer índices de los folds espaciales para usar en caret
+folds <- list()
+for(i in 1:5) {
+  folds[[i]] <- block_folds$splits[[i]]$in_id
+}
+
+# Configurar validación cruzada espacial
 ctrl <- trainControl(
   method = "cv",        # Cross-validation
   number = 5,           # 5 folds
+  index = folds,        # Usar índices de bloques espaciales
   verboseIter = TRUE    # Mostrar progreso
 )
+
+cat("Validación cruzada espacial configurada\n")
 
 # Grilla de hiperparámetros para CART siguiendo el patrón de los cuadernos
 grid <- expand.grid(cp = seq(0.001, 0.05, length.out = 20))
@@ -120,15 +158,15 @@ cat("Valores a probar:", nrow(grid), "\n")
 # 5. ENTRENAMIENTO DEL MODELO            #
 ###########################################
 
-cat("Iniciando entrenamiento del modelo CART...\n")
+cat("Iniciando entrenamiento del modelo CART con validación cruzada espacial...\n")
 
 # Entrenar modelo usando caret (siguiendo el patrón de los cuadernos)
 set.seed(123)
 modelo_cart <- train(
   model_form,           # Fórmula del modelo
-  data = train,         # Datos de entrenamiento
+  data = train,         # Datos de entrenamiento (formato original)
   method = 'rpart',     # CART (Classification And Regression Trees)
-  trControl = ctrl,     # Configuración de CV
+  trControl = ctrl,     # Configuración de CV espacial
   tuneGrid = grid       # Grilla de hiperparámetros
 )
 
@@ -232,6 +270,8 @@ model_info <- list(
   cv_results = modelo_cart$results,
   final_model = modelo_cart,
   variable_importance = importance,
+  spatial_cv_used = TRUE,
+  spatial_blocks = block_folds,
   date_created = Sys.time()
 )
 
@@ -244,16 +284,17 @@ cat("Información del modelo guardada en: stores/models/cart_model_info.rds\n")
 ###########################################
 
 cat("\n", paste(rep("=", 60), collapse = ""), "\n")
-cat("RESUMEN FINAL - CART MODEL\n")
+cat("RESUMEN FINAL - CART MODEL CON VALIDACIÓN CRUZADA ESPACIAL\n")
 cat(paste(rep("=", 60), collapse = ""), "\n")
 cat("Variables predictoras:\n")
 cat("- Estructurales: bedrooms, antiguedad, is_house\n")
 cat("- Espaciales: distancia_parque, distancia_universidad,\n")
 cat("             distancia_estacion_transporte, distancia_zona_comercial\n")
 cat("- De texto: nivel_premium, nivel_completitud, nivel_venta_inmediata\n")
-cat("\nHiperparámetros óptimos:\n")
+cat("\nValidación cruzada: Espacial con bloques (5 folds)\n")
+cat("Hiperparámetros óptimos:\n")
 cat("Complexity Parameter (cp):", modelo_cart$bestTune$cp, "\n")
-cat("\nMétricas de validación cruzada:\n")
+cat("\nMétricas de validación cruzada espacial:\n")
 best_results <- modelo_cart$results[modelo_cart$results$cp == modelo_cart$bestTune$cp, ]
 cat("RMSE:", round(best_results$RMSE, 2), "\n")
 cat("R-squared:", round(best_results$Rsquared, 4), "\n")
