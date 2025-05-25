@@ -20,7 +20,9 @@ pacman::p_load(
   randomForest, # Para Random Forest
   glmnet,       # Para Elastic Net
   rpart,        # Para árboles de decisión
-  nnls          # Para Non-Negative Least Squares
+  nnls,         # Para Non-Negative Least Squares
+  spatialsample, # Para validación cruzada espacial
+  sf            # Para manejo de datos espaciales
 )
 
 # Fijar semilla para reproducibilidad
@@ -41,6 +43,13 @@ cat("Dimensiones test:", dim(test), "\n")
 if(!"price" %in% names(train)) {
   stop("La variable 'price' no se encontró en el dataset de entrenamiento")
 }
+
+# Verificar que existen las coordenadas espaciales
+if(!all(c("lat", "lon") %in% names(train))) {
+  stop("Las variables de coordenadas 'lat' y 'lon' no se encontraron en el dataset")
+}
+
+cat("Coordenadas espaciales disponibles: lat, lon\n")
 
 ###########################################
 # 2. IMPUTACIÓN DE VALORES FALTANTES     #
@@ -93,7 +102,7 @@ if("is_house" %in% names(train)) {
 # Preparar variable dependiente y matriz de predictores para SuperLearner
 Y <- train$price
 
-# Crear matriz de predictores (excluyendo property_id y price)
+# Crear matriz de predictores (excluyendo property_id, price, lat, lon)
 predictores <- c("bedrooms", "antiguedad", "is_house", 
                  "distancia_parque", "distancia_universidad", "distancia_estacion_transporte", 
                  "distancia_zona_comercial", "nivel_premium", "nivel_completitud", "nivel_venta_inmediata")
@@ -134,15 +143,34 @@ cat("Algoritmos seleccionados para SuperLearner:\n")
 cat(paste(sl.lib, collapse = ", "), "\n")
 
 ###########################################
-# 5. CONFIGURACIÓN DE VALIDACIÓN CRUZADA #
+# 5. CONFIGURACIÓN DE VALIDACIÓN CRUZADA ESPACIAL #
 ###########################################
 
-# Configurar validación cruzada de 5 folds (siguiendo patrón de los cuadernos)
-folds <- 5
-set.seed(123)
-index <- split(sample(1:length(Y)), rep(1:folds, length = length(Y)))
+# Convertir datos de entrenamiento a formato sf usando coordenadas
+cat("Configurando validación cruzada espacial...\n")
+train_sf <- st_as_sf(
+  train,
+  coords = c("lon", "lat"),  # lon primero, lat segundo (orden x/y)
+  crs = 4326                 # Sistema de coordenadas WGS84
+)
 
-cat("Configuración de validación cruzada:\n")
+cat("Datos convertidos a formato sf\n")
+
+# Crear bloques espaciales con spatial_block_cv
+set.seed(123)
+block_folds <- spatial_block_cv(train_sf, v = 5)
+
+cat("Bloques espaciales creados:\n")
+print(block_folds)
+
+# Extraer índices de los bloques espaciales para usar con SuperLearner
+folds <- 5
+index <- list()
+for(i in 1:folds) {
+  index[[i]] <- block_folds$splits[[i]]$in_id
+}
+
+cat("Configuración de validación cruzada espacial:\n")
 cat("Número de folds:", folds, "\n")
 cat("Tamaño de cada fold:", sapply(index, length), "\n")
 
@@ -150,17 +178,17 @@ cat("Tamaño de cada fold:", sapply(index, length), "\n")
 # 6. ENTRENAMIENTO DE SUPERLEARNER       #
 ###########################################
 
-cat("Iniciando entrenamiento de SuperLearner...\n")
+cat("Iniciando entrenamiento de SuperLearner con validación cruzada espacial...\n")
 cat("Esto puede tomar varios minutos...\n")
 
-# Entrenar SuperLearner con validación cruzada
+# Entrenar SuperLearner con validación cruzada espacial
 set.seed(123)
 fitY <- SuperLearner(
   Y = Y,                          # Variable dependiente
   X = X,                          # Variables predictoras
   method = "method.NNLS",         # Método de combinación (Non-Negative Least Squares)
   SL.library = sl.lib,            # Biblioteca de algoritmos
-  cvControl = list(V = folds, validRows = index)  # Control de validación cruzada
+  cvControl = list(V = folds, validRows = index)  # Control de validación cruzada espacial
 )
 
 # Mostrar resultados del SuperLearner
@@ -172,7 +200,7 @@ cat("Coeficientes de combinación de algoritmos:\n")
 print(fitY$coef)
 
 # Mostrar riesgo (error) de cada algoritmo
-cat("Riesgo de validación cruzada por algoritmo:\n")
+cat("Riesgo de validación cruzada espacial por algoritmo:\n")
 print(fitY$cvRisk)
 
 ###########################################
@@ -272,6 +300,7 @@ model_info <- list(
   cv_risks = fitY$cvRisk,
   coefficients = fitY$coef,
   cv_folds = folds,
+  cv_method = "spatial_block_cv",
   variables_used = predictores_disponibles,
   date_created = Sys.time()
 )
@@ -285,15 +314,16 @@ cat("Información del modelo guardada en: stores/models/super_learner_model_info
 ###########################################
 
 cat("\n", paste(rep("=", 60), collapse = ""), "\n")
-cat("RESUMEN FINAL - SUPERLEARNER\n")
+cat("RESUMEN FINAL - SUPERLEARNER CON VALIDACIÓN CRUZADA ESPACIAL\n")
 cat(paste(rep("=", 60), collapse = ""), "\n")
+cat("Método de validación: Spatial Block Cross-Validation (5 folds)\n")
 cat("Algoritmos incluidos en el ensemble:\n")
 for(i in 1:length(sl.lib)) {
   cat("-", sl.lib[i], "| Peso:", round(fitY$coef[i], 4), 
       "| CV Risk:", round(fitY$cvRisk[i], 2), "\n")
 }
 cat("\nMejor algoritmo individual:", names(which.min(fitY$cvRisk)), "\n")
-cat("SuperLearner CV Risk:", round(min(fitY$cvRisk), 2), "\n")
+cat("SuperLearner CV Risk (espacial):", round(min(fitY$cvRisk), 2), "\n")
 cat("\nSubmissions generados:\n")
 cat("- submission_7.csv (SuperLearner ensemble)\n")
 if(exists("submission_best_individual")) {
