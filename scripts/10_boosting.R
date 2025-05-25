@@ -14,9 +14,11 @@ setwd("../")
 # Cargar librerías usando pacman
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-  tidyverse,  # Manipulación de datos
-  caret,      # Para entrenamiento de modelos
-  gbm         # Gradient Boosting Machine
+  tidyverse,     # Manipulación de datos
+  caret,         # Para entrenamiento de modelos
+  gbm,           # Gradient Boosting Machine
+  spatialsample, # Validación cruzada espacial
+  sf             # Datos espaciales
 )
 
 # Fijar semilla para reproducibilidad
@@ -42,7 +44,8 @@ if(!"price" %in% names(train)) {
 variables_esperadas <- c(
   "property_id", "price", "bedrooms", "antiguedad", "is_house",
   "distancia_parque", "distancia_universidad", "distancia_estacion_transporte", 
-  "distancia_zona_comercial", "nivel_premium", "nivel_completitud", "nivel_venta_inmediata"
+  "distancia_zona_comercial", "nivel_premium", "nivel_completitud", "nivel_venta_inmediata",
+  "lat", "lon"
 )
 
 cat("\nVerificando variables esperadas:\n")
@@ -117,12 +120,37 @@ print(model_form)
 
 ###########################################
 # 4. CONFIGURACIÓN DE VALIDACIÓN CRUZADA #
+# ESPACIAL                                #
 ###########################################
 
-# Configurar validación cruzada siguiendo el patrón de los cuadernos
+# Crear objeto sf para validación cruzada espacial
+# Siguiendo el patrón de los cuadernos de validación cruzada espacial
+train_sf <- st_as_sf(
+  train,
+  # coords en orden x/y - longitud primero
+  coords = c("lon", "lat"),
+  # Sistema de coordenadas WGS84
+  crs = 4326
+)
+
+cat("Creando bloques espaciales para validación cruzada...\n")
+# Crear bloques espaciales usando spatialsample
+set.seed(123)
+block_folds <- spatial_block_cv(train_sf, v = 5)
+
+cat("Bloques espaciales creados:\n")
+print(block_folds)
+
+# Extraer índices de los bloques para usar en trainControl
+folds <- list()
+for(i in 1:length(block_folds$splits)) {
+  folds[[i]] <- block_folds$splits[[i]]$in_id
+}
+
+# Configurar validación cruzada espacial siguiendo el patrón de los cuadernos
 ctrl <- trainControl(
   method = "cv",        # Cross-validation
-  number = 5,           # 5 folds
+  index = folds,        # Usar índices de bloques espaciales
   verboseIter = TRUE    # Mostrar progreso
 )
 
@@ -267,19 +295,20 @@ cat("Información del modelo guardada en: stores/models/boosting_model_info.rds\
 ###########################################
 
 cat("\n", paste(rep("=", 60), collapse = ""), "\n")
-cat("RESUMEN FINAL - BOOSTING (GBM)\n")
+cat("RESUMEN FINAL - BOOSTING (GBM) CON VALIDACIÓN CRUZADA ESPACIAL\n")
 cat(paste(rep("=", 60), collapse = ""), "\n")
 cat("Variables predictoras:\n")
 cat("- Estructurales: bedrooms, antiguedad, is_house\n")
 cat("- Espaciales: distancia_parque, distancia_universidad,\n")
 cat("             distancia_estacion_transporte, distancia_zona_comercial\n")
 cat("- De texto: nivel_premium, nivel_completitud, nivel_venta_inmediata\n")
-cat("\nMejores hiperparámetros encontrados:\n")
+cat("\nValidación cruzada: Bloques espaciales (5 folds)\n")
+cat("Mejores hiperparámetros encontrados:\n")
 cat("- Número de árboles (n.trees):", modelo_gbm$bestTune$n.trees, "\n")
 cat("- Profundidad máxima (interaction.depth):", modelo_gbm$bestTune$interaction.depth, "\n")
 cat("- Tasa de aprendizaje (shrinkage):", modelo_gbm$bestTune$shrinkage, "\n")
 cat("- Mínimo en nodo (n.minobsinnode):", modelo_gbm$bestTune$n.minobsinnode, "\n")
-cat("\nMétricas de validación cruzada:\n")
+cat("\nMétricas de validación cruzada espacial:\n")
 cat("RMSE:", round(best_results$RMSE, 2), "\n")
 cat("R-squared:", round(best_results$Rsquared, 4), "\n")
 cat("MAE:", round(best_results$MAE, 2), "\n")
