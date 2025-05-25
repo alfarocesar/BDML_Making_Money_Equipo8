@@ -1,5 +1,5 @@
 ################################################################################
-# TÍTULO: 08_random_forest.R                                                   #
+# TÍTULO: 09_random_forest.R                                                   #
 # PROYECTO: Making Money with ML                                               #
 # DESCRIPCIÓN: Implementación de modelo Random Forest para predicción         #
 # FECHA: 22 de mayo de 2025                                                   #
