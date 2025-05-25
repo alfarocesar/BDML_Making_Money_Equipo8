@@ -1,5 +1,5 @@
 ################################################################################
-# TÍTULO: 08_super_learner.R                                                   #
+# TÍTULO: 12_super_learner.R                                                   #
 # PROYECTO: Making Money with ML                                               #
 # DESCRIPCIÓN: Implementación de modelo SuperLearner para predicción          #
 # FECHA: 22 de mayo de 2025                                                   #
