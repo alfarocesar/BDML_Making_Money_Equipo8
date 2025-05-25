@@ -1,5 +1,5 @@
 ################################################################################
-# TÍTULO: 04_elastic_net_model.R                                               #
+# TÍTULO: 07_elastic_net_model.R                                               #
 # PROYECTO: Making Money with ML                                               #
 # DESCRIPCIÓN: Implementación de modelo Elastic Net para predicción de precios#
 # FECHA: 22 de mayo de 2025                                                   #
