@@ -80,9 +80,9 @@ clean_dataset <- function(data, dataset_name) {
   cat("Variables originales:", ncol(data), "\n")
   cat("Observaciones originales:", nrow(data), "\n\n")
   
-  # Mostrar variables que serán eliminadas
+  # Mostrar variables que serán eliminadas (removiendo lat y lon de la lista)
   variables_a_eliminar <- c("city", "surface_total", "surface_covered", "rooms", 
-                            "bathrooms", "operation_type", "lat", "lon", "title", "description")
+                            "bathrooms", "operation_type", "title", "description")
   
   cat("Variables que serán eliminadas:\n")
   for(var in variables_a_eliminar) {
@@ -91,10 +91,10 @@ clean_dataset <- function(data, dataset_name) {
     }
   }
   
-  # Definir variables a mantener según si existe price o no
-  variables_base <- c("property_id", "month", "year", "bedrooms", "property_type")
+  # Definir variables a mantener según si existe price o no (incluyendo lat y lon)
+  variables_base <- c("property_id", "month", "year", "bedrooms", "property_type", "lat", "lon")
   if("price" %in% names(data)) {
-    variables_a_mantener <- c("property_id", "price", "month", "year", "bedrooms", "property_type")
+    variables_a_mantener <- c("property_id", "price", "month", "year", "bedrooms", "property_type", "lat", "lon")
   } else {
     variables_a_mantener <- variables_base
   }
@@ -162,6 +162,14 @@ verify_data_quality <- function(data, dataset_name) {
   
   if("antiguedad" %in% names(data)) {
     cat("Rango de antigüedad:", range(data$antiguedad, na.rm = TRUE), "\n")
+  }
+  
+  if("lat" %in% names(data)) {
+    cat("Rango de lat:", range(data$lat, na.rm = TRUE), "\n")
+  }
+  
+  if("lon" %in% names(data)) {
+    cat("Rango de lon:", range(data$lon, na.rm = TRUE), "\n")
   }
   
   if("is_house" %in% names(data)) {
@@ -247,13 +255,15 @@ cat("TRANSFORMACIONES APLICADAS:\n\n")
 
 cat("1. VARIABLES ELIMINADAS:\n")
 eliminadas <- c("city", "surface_total", "surface_covered", "rooms", 
-                "bathrooms", "operation_type", "lat", "lon", "title", "description")
+                "bathrooms", "operation_type", "title", "description")
 cat(paste0("   - ", eliminadas, collapse = "\n   - "), "\n\n")
 
 cat("2. VARIABLES MANTENIDAS:\n")
 cat("   - property_id: Identificador único\n")
 cat("   - price: Variable dependiente (solo en train)\n") 
-cat("   - bedrooms: Variable predictora\n\n")
+cat("   - bedrooms: Variable predictora\n")
+cat("   - lat: Latitud (para validación cruzada espacial)\n")
+cat("   - lon: Longitud (para validación cruzada espacial)\n\n")
 
 cat("3. VARIABLES TRANSFORMADAS:\n")
 cat("   - property_type → is_house: 1 = casa, 0 = apartamento\n\n")
