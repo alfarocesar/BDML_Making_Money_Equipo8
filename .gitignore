@@ -54,6 +54,8 @@ stores/raw/*
 !stores/raw/README.md
 stores/processed/*
 !stores/processed/README.md
+stores/models/*
+!stores/models/README.md
 
 # Temporary files
 *.temp
