@@ -14,9 +14,11 @@ setwd("../")
 # Cargar librerías usando pacman
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-  tidyverse,  # Manipulación de datos
-  caret,      # Para entrenamiento de modelos
-  ranger      # Implementación eficiente de Random Forest
+  tidyverse,     # Manipulación de datos
+  caret,         # Para entrenamiento de modelos
+  ranger,        # Implementación eficiente de Random Forest
+  spatialsample, # Muestreo espacial para modelos de aprendizaje automático
+  sf             # Leer/escribir/manipular datos espaciales
 )
 
 # Fijar semilla para reproducibilidad
@@ -38,11 +40,12 @@ if(!"price" %in% names(train)) {
   stop("La variable 'price' no se encontró en el dataset de entrenamiento")
 }
 
-# Verificar variables disponibles
+# Verificar variables disponibles incluyendo coordenadas espaciales
 variables_esperadas <- c(
   "property_id", "price", "bedrooms", "antiguedad", "is_house",
   "distancia_parque", "distancia_universidad", "distancia_estacion_transporte", 
-  "distancia_zona_comercial", "nivel_premium", "nivel_completitud", "nivel_venta_inmediata"
+  "distancia_zona_comercial", "nivel_premium", "nivel_completitud", "nivel_venta_inmediata",
+  "lat", "lon"
 )
 
 cat("\nVerificando variables esperadas:\n")
@@ -107,7 +110,7 @@ if("is_house" %in% names(train)) {
 ###########################################
 
 # Definir fórmula del modelo usando todas las variables predictoras disponibles
-# (excluyendo property_id y price)
+# (excluyendo property_id, price, lat y lon)
 model_form <- price ~ bedrooms + antiguedad + is_house + 
   distancia_parque + distancia_universidad + distancia_estacion_transporte + 
   distancia_zona_comercial + nivel_premium + nivel_completitud + nivel_venta_inmediata
@@ -117,14 +120,40 @@ print(model_form)
 
 ###########################################
 # 4. CONFIGURACIÓN DE VALIDACIÓN CRUZADA #
+#    ESPACIAL                             #
 ###########################################
 
-# Configurar validación cruzada siguiendo el patrón de los cuadernos
-ctrl <- trainControl(
-  method = "cv",        # Cross-validation
-  number = 5,           # 5 folds
-  verboseIter = TRUE    # Mostrar progreso
+# Convertir datos de entrenamiento a formato sf usando coordenadas lat/lon
+train_sf <- st_as_sf(
+  train,
+  coords = c("lon", "lat"),
+  crs = 4326  # Sistema de coordenadas WGS84
 )
+
+cat("Datos convertidos a formato sf\n")
+cat("Número de observaciones espaciales:", nrow(train_sf), "\n")
+
+# Crear bloques espaciales con spatial_block_cv
+set.seed(123)
+block_folds <- spatial_block_cv(train_sf, v = 5)
+
+cat("Bloques espaciales creados:\n")
+print(block_folds)
+
+# Extraer índices de los bloques espaciales para uso con caret
+folds_indices <- list()
+for(i in 1:5) {
+  folds_indices[[i]] <- block_folds$splits[[i]]$in_id
+}
+
+# Configurar validación cruzada espacial usando los índices de bloques
+ctrl <- trainControl(
+  method = "cv",          # Cross-validation
+  index = folds_indices,  # Usar índices espaciales
+  verboseIter = TRUE      # Mostrar progreso
+)
+
+cat("Validación cruzada espacial configurada con", length(folds_indices), "bloques\n")
 
 ###########################################
 # 5. CONFIGURACIÓN DE HIPERPARÁMETROS    #
@@ -135,8 +164,8 @@ ctrl <- trainControl(
 # min.node.size: tamaño mínimo de nodos terminales
 # splitrule: criterio de división (para regresión típicamente "variance")
 
-# Número total de predictores (sin contar property_id y price)
-n_predictors <- ncol(train) - 2
+# Número total de predictores (sin contar property_id, price, lat, lon)
+n_predictors <- ncol(train) - 4
 
 # Definir grilla de mtry basada en reglas heurísticas
 mtry_values <- c(
@@ -165,15 +194,15 @@ print(tune_grid)
 # 6. ENTRENAMIENTO DEL MODELO            #
 ###########################################
 
-cat("Iniciando entrenamiento del modelo Random Forest...\n")
+cat("Iniciando entrenamiento del modelo Random Forest con validación cruzada espacial...\n")
 
-# Entrenar modelo usando caret con ranger
+# Entrenar modelo usando caret con ranger y validación cruzada espacial
 set.seed(123)
 modelo_rf <- train(
   model_form,           # Fórmula del modelo
-  data = train,         # Datos de entrenamiento
+  data = train,         # Datos de entrenamiento (formato regular, no sf)
   method = 'ranger',    # Random Forest usando ranger
-  trControl = ctrl,     # Configuración de CV
+  trControl = ctrl,     # Configuración de CV espacial
   tuneGrid = tune_grid, # Grilla de hiperparámetros
   num.trees = 500,      # Número de árboles
   importance = 'permutation' # Calcular importancia de variables
@@ -187,8 +216,8 @@ print(modelo_rf)
 cat("Mejores hiperparámetros:\n")
 print(modelo_rf$bestTune)
 
-# Mostrar métricas de validación cruzada
-cat("Métricas de validación cruzada:\n")
+# Mostrar métricas de validación cruzada espacial
+cat("Métricas de validación cruzada espacial:\n")
 print(modelo_rf$results)
 
 ###########################################
@@ -268,7 +297,9 @@ model_info <- list(
   variable_importance = importance,
   hyperparameter_grid = tune_grid,
   model_type = "Random Forest",
+  cv_type = "Spatial Cross-Validation",
   num_trees = 500,
+  spatial_folds = length(folds_indices),
   date_created = Sys.time()
 )
 
@@ -281,19 +312,21 @@ cat("Información del modelo guardada en: stores/models/random_forest_model_info
 ###########################################
 
 cat("\n", paste(rep("=", 60), collapse = ""), "\n")
-cat("RESUMEN FINAL - RANDOM FOREST\n")
+cat("RESUMEN FINAL - RANDOM FOREST CON VALIDACIÓN CRUZADA ESPACIAL\n")
 cat(paste(rep("=", 60), collapse = ""), "\n")
 cat("Variables predictoras:\n")
 cat("- Estructurales: bedrooms, antiguedad, is_house\n")
 cat("- Espaciales: distancia_parque, distancia_universidad,\n")
 cat("             distancia_estacion_transporte, distancia_zona_comercial\n")
 cat("- De texto: nivel_premium, nivel_completitud, nivel_venta_inmediata\n")
+cat("\nValidación cruzada: Espacial (5 bloques)\n")
+cat("Coordenadas usadas para bloques: lat, lon\n")
 cat("\nHiperparámetros óptimos:\n")
 cat("mtry:", modelo_rf$bestTune$mtry, "\n")
 cat("min.node.size:", modelo_rf$bestTune$min.node.size, "\n")
 cat("splitrule:", modelo_rf$bestTune$splitrule, "\n")
 cat("num.trees: 500\n")
-cat("\nMétricas de validación cruzada:\n")
+cat("\nMétricas de validación cruzada espacial:\n")
 best_idx <- which(modelo_rf$results$mtry == modelo_rf$bestTune$mtry & 
                     modelo_rf$results$min.node.size == modelo_rf$bestTune$min.node.size)
 cat("RMSE:", round(modelo_rf$results$RMSE[best_idx], 2), "\n")
