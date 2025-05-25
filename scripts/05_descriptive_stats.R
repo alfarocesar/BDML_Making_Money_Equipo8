@@ -51,6 +51,7 @@ cat("Test :", dim(test_data), "\n")
 classify_variables <- function() {
   list(
     identifiers = c("property_id"),  # Identificadores únicos - NO incluir en modelos
+    coordinates = c("lat", "lon"),   # Coordenadas geográficas - NO analizar estadísticamente
     binary = c("is_house"),
     numeric_discrete = c("bedrooms"),
     numeric_continuous = c("price", "antiguedad", "distancia_parque", "distancia_universidad", 
@@ -375,6 +376,13 @@ for (dataset_name in c("train", "test")) {
       stats <- stats_categorical_nominal(current_data, var, dataset_name)
       stats$tipo <- "Identificador Único"
       all_stats[[paste0(dataset_name, "_", var)]] <- stats
+    }
+  }
+  
+  # Variables de coordenadas (OMITIR análisis estadístico)
+  for (var in var_types$coordinates) {
+    if(var %in% names(current_data)) {
+      cat(paste0("Omitiendo análisis estadístico de ", var, " (coordenada geográfica)...\n"))
     }
   }
   
@@ -720,6 +728,7 @@ if("train_price" %in% names(all_stats)) {
 
 cat("\n6. NOTAS IMPORTANTES PARA MODELADO:\n")
 cat("   - property_id es identificador único: NO incluir en modelos predictivos\n")
+cat("   - lat y lon son coordenadas geográficas: NO requieren análisis estadístico estándar\n")
 cat("   - antiguedad ahora se trata como variable continua para mejor performance\n")
 cat("   - Variables espaciales requerirán normalización para redes neuronales\n")
 if(missing_train$resumen_general$pct_faltantes_global == 0 && 
@@ -802,6 +811,7 @@ cat("\nAnálisis completado exitosamente.\n")
 # - Los valores faltantes se reportan tanto en conteo como en porcentaje
 # - La variable 'antiguedad' se clasifica como continua según especificaciones
 # - La variable 'property_id' se marca como identificador para exclusión del modelado
+# - Las variables 'lat' y 'lon' se omiten del análisis estadístico descriptivo
 
 ################################################################################
 #                            FIN DEL SCRIPT                                   #
