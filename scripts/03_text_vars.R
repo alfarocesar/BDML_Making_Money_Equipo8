@@ -1,10 +1,9 @@
 ################################################################################
-# TÍTULO: Variables derivadas de texto                                         #
+# TÍTULO: 03_text_vars                                                         #
 # PROYECTO: Making Money with ML                                               #
 # DESCRIPCIÓN: Crea variables basadas en la descripción de propiedades para    #
 #              datasets de entrenamiento y prueba.                            #
 # FECHA: 2025-07-21                                                            #
-# VERSIÓN: 2.0 - Corregida con word boundaries y optimizaciones               #
 ################################################################################
 
 # Configurar directorio de trabajo automáticamente
