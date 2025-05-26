@@ -227,11 +227,6 @@ cat("NAs:", sum(is.na(pred_values)), "\n")
 # 8. EXPORTACIÓN DE RESULTADOS           #
 ###########################################
 
-# Crear directorio submissions si no existe
-if (!dir.exists("stores/submissions")) {
-  dir.create("stores/submissions", recursive = TRUE)
-}
-
 # Crear submission
 submission <- data.frame(
   property_id = test$property_id,
@@ -247,7 +242,7 @@ cat("Preview del submission:\n")
 print(head(submission))
 
 # Exportar submission
-write_csv(submission, "stores/submissions/submission_7.csv")
+write_csv(submission, "stores/submissions/submission_SL1.csv")
 
 cat("Submission exportado exitosamente: stores/submissions/submission_7.csv\n")
 

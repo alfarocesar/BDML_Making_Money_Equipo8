@@ -214,11 +214,6 @@ final_fit_2 <- fit(final_workflow_2, data = train_features %>% select(-lat, -lon
 # 7. PREDICCIONES Y EXPORTACIÓN          #
 ###########################################
 
-# Crear directorio submissions si no existe
-if (!dir.exists("stores/submissions")) {
-  dir.create("stores/submissions", recursive = TRUE)
-}
-
 # Realizar predicciones (excluyendo lat/lon de los datos de test)
 cat("Generando predicciones...\n")
 predictions_1 <- predict(final_fit_1, new_data = test_features %>% select(-lat, -lon))
@@ -240,8 +235,8 @@ cat("NAs en predicciones modelo 1:", sum(is.na(predictions_1$.pred)), "\n")
 cat("NAs en predicciones modelo 2:", sum(is.na(predictions_2$.pred)), "\n")
 
 # Exportar submissions
-write_csv(submission_5, "stores/submissions/submission_5.csv")
-write_csv(submission_6, "stores/submissions/submission_6.csv")
+write_csv(submission_5, "stores/submissions/submission_EN1.csv")
+write_csv(submission_6, "stores/submissions/submission_EN2.csv")
 
 cat("Submissions exportados exitosamente:\n")
 cat("- stores/submissions/submission_5.csv (Modelo Elastic Net básico con CV espacial)\n")
