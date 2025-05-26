@@ -106,28 +106,7 @@ if("is_house" %in% names(train)) {
 }
 
 ###########################################
-# 3. PREPROCESAMIENTO PARA NEURAL NETWORK#
-###########################################
-
-# Para neural networks necesitamos normalizar todas las variables
-# Crear objeto de preprocesamiento
-preprocess_params <- preProcess(
-  train[, variables_numericas_continuas], 
-  method = c("center", "scale")
-)
-
-# Aplicar normalización a datos de entrenamiento y test
-train_normalized <- predict(preprocess_params, train)
-test_normalized <- predict(preprocess_params, test)
-
-# También normalizar la variable objetivo para mejorar convergencia
-price_params <- preProcess(train["price"], method = c("center", "scale"))
-train_normalized$price <- predict(price_params, train["price"])$price
-
-cat("Variables normalizadas exitosamente\n")
-
-###########################################
-# 4. ESPECIFICACIÓN DEL MODELO           #
+# 3. ESPECIFICACIÓN DEL MODELO           #
 ###########################################
 
 # Definir fórmula del modelo (NO incluir lat/lon como predictores)
@@ -139,13 +118,13 @@ cat("\nFórmula del modelo:\n")
 print(model_form)
 
 ###########################################
-# 5. CONFIGURACIÓN DE VALIDACIÓN CRUZADA #
+# 4. CONFIGURACIÓN DE VALIDACIÓN CRUZADA #
 # ESPACIAL                                #
 ###########################################
 
 # Convertir datos de entrenamiento a formato sf usando coordenadas lat/lon
 train_sf <- st_as_sf(
-  train_normalized,
+  train,
   coords = c("lon", "lat"),
   crs = 4326
 )
@@ -184,7 +163,7 @@ cat("Grilla de hiperparámetros:\n")
 print(nnet_grid)
 
 ###########################################
-# 6. ENTRENAMIENTO DEL MODELO            #
+# 5. ENTRENAMIENTO DEL MODELO            #
 ###########################################
 
 cat("Iniciando entrenamiento del modelo Neural Network con validación cruzada espacial...\n")
@@ -193,13 +172,14 @@ cat("Iniciando entrenamiento del modelo Neural Network con validación cruzada e
 set.seed(123)
 modelo_nnet <- train(
   model_form,                    # Fórmula del modelo
-  data = train_normalized,       # Datos normalizados
+  data = train,                  # Datos de entrenamiento
   method = 'nnet',              # Neural network
   trControl = ctrl,             # Configuración de CV espacial
   tuneGrid = nnet_grid,         # Grilla de hiperparámetros
   linout = TRUE,                # Para regresión (salida lineal)
   trace = FALSE,                # No mostrar detalles de entrenamiento
-  maxit = 1000                  # Máximo número de iteraciones
+  maxit = 1000,                 # Máximo número de iteraciones
+  preProcess = c("center", "scale")  # Normalización automática
 )
 
 # Mostrar resultados del modelo
@@ -215,39 +195,29 @@ cat("Métricas de validación cruzada espacial:\n")
 print(modelo_nnet$results)
 
 ###########################################
-# 7. PREDICCIONES                        #
+# 6. PREDICCIONES                        #
 ###########################################
 
-# Realizar predicciones en el conjunto de test normalizado
+# Realizar predicciones en el conjunto de test
 cat("Generando predicciones...\n")
-predictions_normalized <- predict(modelo_nnet, newdata = test_normalized)
-
-# Desnormalizar las predicciones para obtener valores en escala original
-# Usando los parámetros de normalización de la variable objetivo
-predictions_original <- predictions_normalized * attr(price_params$std, "scaled:scale") + 
-  attr(price_params$mean, "scaled:center")
+predictions <- predict(modelo_nnet, newdata = test)
 
 # Verificar predicciones
 cat("Estadísticas de las predicciones:\n")
-cat("Min:", min(predictions_original, na.rm = TRUE), "\n")
-cat("Max:", max(predictions_original, na.rm = TRUE), "\n")
-cat("Mean:", mean(predictions_original, na.rm = TRUE), "\n")
-cat("Median:", median(predictions_original, na.rm = TRUE), "\n")
-cat("NAs:", sum(is.na(predictions_original)), "\n")
+cat("Min:", min(predictions, na.rm = TRUE), "\n")
+cat("Max:", max(predictions, na.rm = TRUE), "\n")
+cat("Mean:", mean(predictions, na.rm = TRUE), "\n")
+cat("Median:", median(predictions, na.rm = TRUE), "\n")
+cat("NAs:", sum(is.na(predictions)), "\n")
 
 ###########################################
-# 8. EXPORTACIÓN DE RESULTADOS           #
+# 7. EXPORTACIÓN DE RESULTADOS           #
 ###########################################
-
-# Crear directorio submissions si no existe
-if (!dir.exists("stores/submissions")) {
-  dir.create("stores/submissions", recursive = TRUE)
-}
 
 # Crear submission
 submission <- data.frame(
   property_id = test$property_id,
-  price = predictions_original
+  price = predictions
 )
 
 # Verificar submission
@@ -259,12 +229,12 @@ cat("Preview del submission:\n")
 print(head(submission))
 
 # Exportar submission
-write_csv(submission, "stores/submissions/submission_7.csv")
+write_csv(submission, "stores/submissions/submission_NN1.csv")
 
 cat("Submission exportado exitosamente: stores/submissions/submission_7.csv\n")
 
 ###########################################
-# 9. ANÁLISIS DE IMPORTANCIA DE VARIABLES#
+# 8. ANÁLISIS DE IMPORTANCIA DE VARIABLES#
 ###########################################
 
 # Calcular importancia de variables
@@ -273,7 +243,7 @@ cat("Importancia de variables:\n")
 print(importance)
 
 ###########################################
-# 10. GUARDADO DE INFORMACIÓN DEL MODELO #
+# 9. GUARDADO DE INFORMACIÓN DEL MODELO  #
 ###########################################
 
 # Crear directorio models si no existe
@@ -288,8 +258,6 @@ model_info <- list(
   cv_results = modelo_nnet$results,
   final_model = modelo_nnet,
   variable_importance = importance,
-  preprocess_params = preprocess_params,
-  price_params = price_params,
   spatial_folds = block_folds,
   date_created = Sys.time()
 )
@@ -299,7 +267,7 @@ saveRDS(model_info, "stores/models/neural_network_model_info.rds")
 cat("Información del modelo guardada en: stores/models/neural_network_model_info.rds\n")
 
 ###########################################
-# 11. RESUMEN FINAL                      #
+# 10. RESUMEN FINAL                      #
 ###########################################
 
 cat("\n", paste(rep("=", 60), collapse = ""), "\n")
@@ -322,7 +290,7 @@ cat("R-squared:", round(best_results$Rsquared, 4), "\n")
 cat("MAE:", round(best_results$MAE, 2), "\n")
 cat("\nSubmission generado: submission_7.csv\n")
 cat("Observaciones procesadas:", nrow(test), "\n")
-cat("Preprocesamiento: Variables normalizadas (center + scale)\n")
+cat("Preprocesamiento: Variables normalizadas automáticamente por caret\n")
 cat("Validación cruzada: Espacial con bloques (5-fold)\n")
 cat(paste(rep("=", 60), collapse = ""), "\n")
 
