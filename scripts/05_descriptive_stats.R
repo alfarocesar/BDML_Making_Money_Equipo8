@@ -1,8 +1,8 @@
 ################################################################################
-# TÍTULO: 05_descriptive_analysis.R                                           #
-# PROYECTO: Making Money with ML                                              #
-# DESCRIPCIÓN: Análisis de estadísticas descriptivas y datos faltantes       #
-# FECHA: 22 de mayo de 2025                                                   #
+# TÍTULO: 05_descriptive_analysis.R                                            #
+# PROYECTO: Making Money with ML                                               #
+# DESCRIPCIÓN: Análisis de estadísticas descriptivas y datos faltantes         #
+# FECHA: 22 de mayo de 2025                                                    #
 ################################################################################
 
 # Configurar directorio de trabajo automáticamente

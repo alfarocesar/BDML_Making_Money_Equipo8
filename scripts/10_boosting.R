@@ -1,8 +1,8 @@
 ################################################################################
 # TÍTULO: 10_boosting.R                                                        #
 # PROYECTO: Making Money with ML                                               #
-# DESCRIPCIÓN: Implementación de modelo Boosting para predicción de precios   #
-# FECHA: 22 de mayo de 2025                                                   #
+# DESCRIPCIÓN: Implementación de modelo Boosting para predicción de precios    #
+# FECHA: 22 de mayo de 2025                                                    #
 ################################################################################
 
 # Configurar directorio de trabajo automáticamente

@@ -1,8 +1,8 @@
 ################################################################################
-# TÍTULO: 11_neural_network.R                                                 #
+# TÍTULO: 11_neural_network.R                                                  #
 # PROYECTO: Making Money with ML                                               #
-# DESCRIPCIÓN: Implementación de modelo Neural Network para predicción        #
-# FECHA: 22 de mayo de 2025                                                   #
+# DESCRIPCIÓN: Implementación de modelo Neural Network para predicción         #
+# FECHA: 22 de mayo de 2025                                                    #
 ################################################################################
 
 # Configurar directorio de trabajo automáticamente
@@ -192,8 +192,8 @@ cat("Iniciando entrenamiento del modelo Neural Network con validación cruzada e
 # Entrenar modelo usando caret con grid search y validación cruzada espacial
 set.seed(123)
 modelo_nnet <- train(
-  model_form,                    # Fórmula del modelo
-  data = train_normalized,       # Datos normalizados
+  model_form,                   # Fórmula del modelo
+  data = train_normalized,      # Datos normalizados
   method = 'nnet',              # Neural network
   trControl = ctrl,             # Configuración de CV espacial
   tuneGrid = nnet_grid,         # Grilla de hiperparámetros
@@ -222,10 +222,17 @@ print(modelo_nnet$results)
 cat("Generando predicciones...\n")
 predictions_normalized <- predict(modelo_nnet, newdata = test_normalized)
 
-# Desnormalizar las predicciones para obtener valores en escala original
-# Usando los parámetros de normalización de la variable objetivo
-predictions_original <- predictions_normalized * attr(price_params$std, "scaled:scale") + 
-  attr(price_params$mean, "scaled:center")
+#Extraer correctamente los parámetros de normalización (mean y sd)
+mean_price <- price_params$mean["price"]
+sd_price <- price_params$std["price"]
+
+if (length(predictions_normalized) != nrow(test)) {
+  stop(
+    "El número de predicciones no coincide con el número de observaciones en test."
+    )
+}
+
+predictions_original <- predictions_normalized * sd_price + mean_price
 
 # Verificar predicciones
 cat("Estadísticas de las predicciones:\n")

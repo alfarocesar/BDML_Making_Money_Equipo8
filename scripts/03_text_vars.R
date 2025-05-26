@@ -2,7 +2,7 @@
 # TÍTULO: 03_text_vars                                                         #
 # PROYECTO: Making Money with ML                                               #
 # DESCRIPCIÓN: Crea variables basadas en la descripción de propiedades para    #
-#              datasets de entrenamiento y prueba.                            #
+#              datasets de entrenamiento y prueba.                             #
 # FECHA: 2025-07-21                                                            #
 ################################################################################
 
