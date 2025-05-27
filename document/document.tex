@@ -117,31 +117,73 @@ Texto del abstract
 
 \section{Introducción}
 
-Incluir la introducción
+Este documento detalla el desarrollo de un modelo predictivo para la estimación de precios de venta de propiedades residenciales, enfocado en el barrio Chapinero de Bogotá, Colombia. La problemática se enmarca en la necesidad de una startup dedicada a la compraventa de bienes raíces de optimizar sus operaciones de adquisición, minimizando el riesgo de sobrestimación en la valoración de activos.
 
-\section{Datos}
+La precisión en la predicción de precios es crítica para el éxito financiero en el sector inmobiliario. Un ejemplo notable es el caso de Zillow Offers, que resultó en pérdidas de aproximadamente 500 millones de USD y la reducción del 25\% de su fuerza laboral debido a algoritmos que sobrestimaron el valor de las propiedades \cite{zillow2021}. Este caso resalta los riesgos inherentes a modelos predictivos imprecisos.
 
-\subsection{Adecuación de los datos}
+El fundamento conceptual del modelo se basa en la teoría de precios hedónicos, propuesta por Rosen \cite{rosen1974}. Esta teoría establece que el precio de una propiedad (\(P_i\)) es una función de sus características estructurales, de vecindario y amenidades locales: 
+\[
+P_i = f(c_{i1}, c_{i2}, ..., c_{in})
+\]
+Dado que Rosen no especifica una forma funcional para \(f\), esto permite explorar modelos de aprendizaje automático. Los precios hedónicos son precios implícitos de atributos revelados a partir de observaciones del mercado.
 
-\subsection{Construcción de la muestra}
+El modelo desarrollado busca estimar precios de oferta de viviendas en Chapinero, apoyando decisiones de compra de una startup, minimizando errores que puedan llevar a sobrevaloraciones, como ocurrió con Zillow Offers.
 
-\subsubsection{Análisis y limpieza de las bases de datos}
+Los datos provienen de Properati, y ante la escasez de información específica para Chapinero, se enriquecieron mediante ingeniería de características desde fuentes externas y descripciones textuales. Se anticipa que el modelo \textit{Extreme Gradient Boosting} (XGBoost) ofrecerá resultados robustos y precisos, dada su eficacia con relaciones no lineales y datos de alta dimensionalidad \cite{chen2016xgboost}.
 
-\subsection{Limpieza de datos y tratamiento de valores faltantes}
+\section{Adecuación de los Datos}
 
-\subsection{Análisis descriptivo}
+La ausencia de datos específicos para Chapinero podría llevar a sesgos geográficos o bajo poder predictivo. Para mitigar esto, se incorporaron variables externas y se procesó texto descriptivo.
 
-\subsection{Selección final de variables}
+Los datos utilizados incluyen dos bases de Properati: entrenamiento (\texttt{train.csv}) y prueba (\texttt{test.csv}), que contienen características estructurales, ubicación geográfica y descripciones textuales. Se complementaron con variables geoespaciales derivadas.
+
+\subsection{Construcción de la Muestra}
+
+La muestra se construyó mediante adquisición, limpieza y transformación de datos. Se diseñaron funciones como \texttt{calculate\_antiguedad()} y \texttt{transform\_property\_type()} para calcular antigüedad de publicación y codificar el tipo de propiedad (casa/apartamento), respectivamente.
+
+\subsection{Limpieza y Tratamiento de Valores Faltantes}
+
+Se creó una función \texttt{clean\_dataset()} que eliminó variables irrelevantes (\texttt{city}, \texttt{surface\_total}, \texttt{rooms}), creó nuevas variables (\texttt{antiguedad}, \texttt{is\_house}), y estandarizó nombres. Se imputaron valores faltantes con la mediana y se transformó la variable objetivo con \(\log(1 + \text{price})\).
+
+\subsection{Análisis Descriptivo y Selección de Variables}
+
+Se incluyeron variables estructurales, geográficas, textuales y externas. Se desarrollaron funciones de procesamiento de texto como \texttt{limpiar\_texto()} y \texttt{procesar\_datos()}, generando tres variables clave:
+
+\begin{enumerate}[label=\arabic*.]
+    \item \textbf{nivel\_premium}: Conteo (0 a 5) de términos relacionados con lujo (e.g., jacuzzi, panorámica).
+    \item \textbf{nivel\_completitud}: Proporción de espacios funcionales mencionados (cocina, baño, etc.).
+    \item \textbf{nivel\_venta\_inmediata}: Conteo (0 a 3) de términos que indican urgencia (e.g., remate, ganga).
+\end{enumerate}
 
 \section{Modelos y Resultados}
 
-\subsection{Modelo de Selección y Entrenamiento}
+Tras evaluar modelos como regresión lineal, Elastic Net, árboles de decisión, Random Forest y redes neuronales, XGBoost se identificó como el de mejor desempeño para esta tarea, lo cual concuerda con hallazgos recientes \cite{chen2016xgboost}.
 
-\subsubsection{Metodología}
+\subsection{Modelo y Entrenamiento}
+
+Se utilizó XGBoost, entrenado con el paquete \texttt{caret} en R, empleando validación cruzada de 5 pliegues y búsqueda en cuadrícula sobre hiperparámetros:
+
+\begin{itemize}
+    \item \texttt{nrounds} = [500, 1000, 1500]
+    \item \texttt{eta} = [0.01, 0.05, 0.1]
+    \item \texttt{max\_depth} = [4, 6, 8]
+    \item \texttt{gamma} = [0, 0.1, 0.2]
+    \item \texttt{subsample}, \texttt{colsample\_bytree} = [0.7, 0.9], [0.6, 0.8]
+\end{itemize}
+
+La métrica de optimización fue el RMSE, y la variable objetivo fue \(\log(1 + \text{price})\).
 
 \subsection{Resultados}
 
-\subsection{Matrices de Confusión}
+El modelo final presentó:
+
+\begin{itemize}
+    \item RMSE en entrenamiento: \textasciitilde 99,444,630.02
+    \item \(R^2\) en entrenamiento: 0.9078
+\end{itemize}
+
+Estos resultados indican una buena capacidad del modelo para capturar la variabilidad del precio de las propiedades en Bogotá, especialmente en la zona de Chapinero.
+
 
 \section{Conclusión}
 
