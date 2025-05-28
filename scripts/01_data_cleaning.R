@@ -123,6 +123,33 @@ clean_dataset <- function(data, dataset_name) {
   return(cleaned_data)
 }
 
+# En esta sección se definen las funciones auxiliares que automatizan y encapsulan
+# tareas clave del proceso de limpieza:
+
+# 1. `calculate_antiguedad()`:
+#    - Calcula la antigüedad de publicación de cada propiedad (en meses) tomando
+#      como referencia diciembre de 2021. Esto permite capturar el tiempo en mercado
+#      como una variable relevante para el análisis sin usar directamente `month` y `year`.
+
+# 2. `transform_property_type()`:
+#    - Convierte la variable categórica `property_type` a formato binario, donde
+#      1 representa propiedades tipo casa y 0 representa apartamentos u otros.
+#      Esta transformación simplifica el uso de esta variable en modelos de regresión
+#      o árboles de decisión.
+
+# 3. `clean_dataset()`:
+#    - Es la función central de limpieza. Aplica transformaciones al dataset de entrada:
+#      a. Elimina variables irrelevantes, constantes o con alta proporción de valores faltantes.
+#      b. Calcula la antigüedad.
+#      c. Codifica el tipo de propiedad.
+#      d. Retorna un dataset limpio, reducido y estructurado, listo para ingeniería de variables
+#         o modelado.
+
+# Estas funciones permiten estandarizar la limpieza tanto del conjunto de entrenamiento como
+# del conjunto de prueba, garantizando consistencia y reproducibilidad en el pipeline.
+
+
+
 ###########################################
 # 3. APLICAR LIMPIEZA A AMBOS DATASETS   #
 ###########################################
@@ -198,6 +225,42 @@ verify_data_quality <- function(data, dataset_name) {
 verify_data_quality(train_clean, "TRAIN")
 verify_data_quality(test_clean, "TEST")
 
+# ==============================================================
+# LIMPIEZA Y VERIFICACIÓN DE DATOS
+# ==============================================================
+
+# El proceso de limpieza aplicado a los conjuntos de entrenamiento y prueba permitió depurar 
+# las variables más relevantes para el modelado, manteniendo una estructura homogénea, libre de 
+# valores faltantes y adecuada para el pipeline de predicción.
+
+# Para ambos conjuntos:
+# - Se eliminaron variables con alta proporción de valores ausentes o sin valor predictivo 
+#   ('surface_total', 'surface_covered', 'rooms', 'bathrooms', 'operation_type', 'title', 'description').
+# - Se eliminaron variables constantes ('city').
+# - Se crearon dos nuevas variables derivadas:
+#     * 'antiguedad': número de meses transcurridos desde diciembre de 2021.
+#     * 'is_house': codificación binaria de 'property_type' (1 = casa, 0 = apartamento).
+
+# Dataset limpio de entrenamiento:
+# - Dimensiones finales: 38,644 observaciones × 7 variables.
+# - No se presentan valores faltantes en ninguna variable.
+# - 'bedrooms' varía entre 0 y 11, mientras que 'antiguedad' cubre de 4 a 32 meses.
+# - Las coordenadas geográficas ('lat' y 'lon') están completas y en rangos esperados para Bogotá.
+# - La distribución de 'is_house' muestra que el 24.5% de las observaciones corresponden a casas.
+# - La variable objetivo 'price' tiene un rango amplio (300M a 1650M COP), con una media de ~654M y mediana de ~560M.
+
+# Dataset limpio de prueba:
+# - Dimensiones finales: 10,286 observaciones × 7 variables.
+# - Solo la variable 'price' contiene valores faltantes (como es esperado en la base de prueba).
+# - El resto de variables se encuentra completamente disponible.
+# - El patrón geográfico y de distribución de 'bedrooms' y 'is_house' es coherente con el conjunto de entrenamiento.
+
+# En resumen, los datasets han sido estandarizados y preparados exitosamente, eliminando ruido 
+# y redundancia. Las transformaciones aplicadas garantizan consistencia entre conjuntos, y 
+# las variables resultantes están listas para el siguiente paso: ingeniería de características 
+# y entrenamiento del modelo.
+
+
 ###########################################
 # 5. ESTADÍSTICAS DESCRIPTIVAS BÁSICAS   #
 ###########################################
@@ -211,6 +274,49 @@ print(summary(train_clean))
 
 cat("\n--- DATASET DE PRUEBA ---\n")
 print(summary(test_clean))
+
+# ==============================================================
+# ESTADÍSTICAS DESCRIPTIVAS DE LOS DATOS LIMPIOS
+# ==============================================================
+
+# --- CONJUNTO DE ENTRENAMIENTO ---
+
+# La base contiene 38,644 observaciones y 7 variables limpias.
+# La variable objetivo `price` presenta una distribución asimétrica a la derecha, 
+# con un valor mínimo de 300 millones COP y máximo de 1.650 millones. 
+# La mediana es de 560 millones y la media de aproximadamente 654 millones,
+# lo cual sugiere presencia de valores extremos que podrían justificar una transformación logarítmica.
+
+# La variable `bedrooms` varía entre 0 y 11, con una mediana de 3 habitaciones,
+# reflejando una mayoría de propiedades de tamaño mediano. La media es 3.1.
+
+# Las coordenadas `lat` y `lon` se distribuyen consistentemente con la geografía de Bogotá:
+# latitudes entre 4.577 y 4.765, longitudes entre -74.17 y -74.03.
+
+# La variable `antiguedad` (medida en meses desde diciembre de 2021) va de 4 a 32 meses,
+# con una mediana de 12 meses, lo que indica que la mayoría de propiedades llevan
+# alrededor de un año publicadas.
+
+# La variable `is_house` indica que solo el 24.5% de las propiedades son casas, 
+# mientras que el 75.5% son apartamentos, lo que puede reflejar la oferta urbana predominante.
+
+# --- CONJUNTO DE PRUEBA ---
+
+# Contiene 10,286 observaciones con las mismas 7 variables.
+# La variable `price` no tiene valores observados (NA en el 100%), como es esperado para predicción.
+
+# `bedrooms` tiene una mediana de 2 habitaciones, ligeramente menor que en entrenamiento (3),
+# y un valor máximo también de 11.
+
+# Las coordenadas `lat` y `lon` se encuentran en rangos coherentes con el conjunto de entrenamiento:
+# latitudes entre 4.589 y 4.733, y longitudes entre -74.10 y -74.03.
+
+# `antiguedad` presenta valores similares (mínimo 4, máximo 32 meses),
+# con mediana de 11 meses, lo cual sugiere que ambas muestras están temporalmente alineadas.
+
+# La proporción de casas (`is_house = 1`) en el conjunto de prueba es muy baja (2.66%),
+# lo que sugiere una subrepresentación de este tipo de propiedad respecto al entrenamiento.
+# Esto podría requerir atención durante la validación para evitar sesgos de predicción.
 
 ###########################################
 # 6. GUARDAR DATOS LIMPIOS               #
