@@ -1,3 +1,55 @@
 \begin{thebibliography}{}
 
+\bibitem[{Anthropic}, 2023]{claude2023conversations}
+{Anthropic} (2023).
+\newblock Conversaciones con claude ai assistant.
+\newblock Utilizado para estructura de documentos LaTeX, y mejoramiento del código en R.
+
+\bibitem[Castillo-Álvarez and Sarmiento-Barbieri, 2024a]{missing_values_part1}
+Castillo-Álvarez, G. and Sarmiento-Barbieri, I. (2024a).
+\newblock Data pre-processing: Visualizing and handling missing values (part 1).
+\newblock Notebook proporcionado como material del curso.
+
+\bibitem[Castillo-Álvarez and Sarmiento-Barbieri, 2024b]{missing_values_part2}
+Castillo-Álvarez, G. and Sarmiento-Barbieri, I. (2024b).
+\newblock Data pre-processing: Visualizing and handling missing values (part 2).
+\newblock Notebook proporcionado como material del curso.
+
+\bibitem[Chen and Guestrin, 2016]{chen2016xgboost}
+Chen, T. and Guestrin, C. (2016).
+\newblock Xgboost: A scalable tree boosting system.
+\newblock {\em arXiv preprint arXiv:1603.02754}.
+
+\bibitem[James et~al., 2021]{james2021introduction}
+James, G., Witten, D., Hastie, T., and Tibshirani, R. (2021).
+\newblock {\em An Introduction to Statistical Learning: with Applications in R}.
+\newblock Springer, New York, NY, 2 edition.
+
+\bibitem[Naus, 2025]{uniandes-bdml-2025-10-ps-3}
+Naus (2025).
+\newblock Uniandes bdml 2025_10 ps3.
+\newblock \url{https://kaggle.com/competitions/uniandes-bdml-2025-10-ps-3}.
+\newblock Kaggle.
+
+\bibitem[News, 2021]{zillow2021}
+News, B. (2021).
+\newblock Zillow shuts down home buying business, cites inaccuracy in algorithm.
+\newblock \url{https://www.bloomberg.com/news/articles/2021-11-02/zillow-quits-home-flipping-business}.
+\newblock Retrieved from \url{https://www.bloomberg.com/news/articles/2021-11-02/zillow-quits-home-flipping-business}.
+
+\bibitem[{OpenAI}, 2023]{chatgpt2023conversations}
+{OpenAI} (2023).
+\newblock Conversaciones con chatgpt.
+\newblock Utilizado para estructura de documentos LaTeX, y mejoramiento del código en R.
+
+\bibitem[Rosen, 1974]{rosen1974}
+Rosen, S. (1974).
+\newblock Hedonic prices and implicit markets: Product differentiation in pure competition.
+\newblock {\em Journal of Political Economy}, 82(1):34--55.
+
+\bibitem[Sarmiento-Barbieri, 2024]{data_cleaning_tidyverse}
+Sarmiento-Barbieri, I. (2024).
+\newblock Limpieza de datos con tidyverse.
+\newblock Notebook proporcionado como material del curso.
+
 \end{thebibliography}
