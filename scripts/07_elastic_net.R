@@ -265,9 +265,9 @@ model_info <- list(
   spatial_cv_info = "Validación cruzada espacial con 5 bloques usando spatialsample"
 )
 
-saveRDS(model_info, "stores/models/elastic_net_model_info.rds")
+# saveRDS(model_info, "stores/models/elastic_net_model_info.rds")
 
-cat("\nInformación del modelo guardada en: stores/models/elastic_net_model_info.rds\n")
+# cat("\nInformación del modelo guardada en: stores/models/elastic_net_model_info.rds\n")
 
 ################################################################################
 #                            FIN DEL SCRIPT                                   #
