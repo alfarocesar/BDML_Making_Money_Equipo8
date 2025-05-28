@@ -245,9 +245,9 @@ model_info <- list(
   date_created = Sys.time()
 )
 
-saveRDS(model_info, "stores/models/linear_regression_model_info.rds")
+# saveRDS(model_info, "stores/models/linear_regression_model_info.rds")
 
-cat("Información del modelo guardada en: stores/models/linear_regression_model_info.rds\n")
+# cat("Información del modelo guardada en: stores/models/linear_regression_model_info.rds\n")
 
 ###########################################
 # 10. RESUMEN FINAL                      #
