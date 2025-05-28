@@ -27,15 +27,14 @@ James, G., Witten, D., Hastie, T., and Tibshirani, R. (2021).
 
 \bibitem[Naus, 2025]{uniandes-bdml-2025-10-ps-3}
 Naus (2025).
-\newblock Uniandes bdml 2025_10 ps3.
+\newblock Uniandes bdml 2025\_10 ps3.
 \newblock \url{https://kaggle.com/competitions/uniandes-bdml-2025-10-ps-3}.
 \newblock Kaggle.
 
 \bibitem[News, 2021]{zillow2021}
 News, B. (2021).
 \newblock Zillow shuts down home buying business, cites inaccuracy in algorithm.
-\newblock \url{https://www.bloomberg.com/news/articles/2021-11-02/zillow-quits-home-flipping-business}.
-\newblock Retrieved from \url{https://www.bloomberg.com/news/articles/2021-11-02/zillow-quits-home-flipping-business}.
+\newblock Disponible en: \url{https://www.bloomberg.com/news/articles/2021-11-02/zillow-quits-home-flipping-business}.
 
 \bibitem[{OpenAI}, 2023]{chatgpt2023conversations}
 {OpenAI} (2023).
