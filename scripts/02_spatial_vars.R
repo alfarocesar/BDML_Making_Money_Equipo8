@@ -144,6 +144,51 @@ crear_variables_espaciales <- function(datos, bbox) {
   return(resultados)
 }
 
+# ==================================================================================
+# COMENTARIO
+# ==================================================================================
+# La función `crear_variables_espaciales()` genera un conjunto de variables derivadas 
+# basadas en la ubicación geográfica (latitud/longitud) de cada propiedad, utilizando 
+# datos públicos de OpenStreetMap (OSM) dentro de un bounding box definido (`bbox`).
+
+# Requiere que el dataset contenga las columnas `property_id`, `lat` y `lon`.
+# Convierte los datos a objetos espaciales (sf) y calcula distancias mínimas desde cada 
+# propiedad hacia los siguientes puntos de interés urbanos:
+
+# 1. PARQUES: 
+#    - Utiliza la etiqueta `leisure = park`.
+#    - Si no se encuentran registros, asigna una distancia por defecto de 5.000 metros.
+
+# 2. UNIVERSIDADES: 
+#    - Utiliza `amenity = university` en puntos y polígonos.
+#    - Se calcula la distancia mínima entre ambos tipos de geometría.
+#    - Valor por defecto: 3.000 metros si no hay registros.
+
+# 3. ESTACIONES DE TRANSMILENIO:
+#    - Utiliza `public_transport = station`.
+#    - Calcula la distancia mínima a cada estación.
+#    - Valor por defecto: 1.000 metros.
+
+# 4. ZONAS COMERCIALES:
+#    - Utiliza la etiqueta genérica `shop` para cualquier punto comercial.
+#    - Valor por defecto: 1.500 metros si no hay registros.
+
+# Cada cálculo se realiza dentro de un bloque `tryCatch` para manejar errores de red o vacíos
+# en la descarga OSM. Esto asegura la continuidad del script sin interrupciones.
+
+# La función devuelve un `data.frame` con `property_id` y las variables nuevas:
+# - `distancia_parque`
+# - `distancia_universidad`
+# - `distancia_estacion_transporte`
+# - `distancia_zona_comercial`
+
+# Estas variables espaciales enriquecen el dataset con información contextual relevante,
+# mejorando el poder predictivo de los modelos de precios al capturar características 
+# de localización asociadas al valor inmobiliario.
+# ==================================================================================
+
+
+
 ###########################################
 # 3. EJECUCIÓN DEL CÓDIGO                #
 ###########################################
