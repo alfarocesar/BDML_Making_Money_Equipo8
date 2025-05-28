@@ -118,17 +118,17 @@ Este estudio desarrolla un modelo predictivo para la estimación de precios de p
 
 Este documento detalla el desarrollo de un modelo predictivo para la estimación de precios de venta de propiedades residenciales, enfocado en el barrio Chapinero de Bogotá, Colombia. La problemática se enmarca en la necesidad de una startup dedicada a la compraventa de bienes raíces de optimizar sus operaciones de adquisición, minimizando el riesgo de sobrestimación en la valoración de activos.
 
-La precisión en la predicción de precios es crítica para el éxito financiero en el sector inmobiliario. Un ejemplo notable es el caso de Zillow Offers, que resultó en pérdidas de aproximadamente 500 millones de USD y la reducción del 25\% de su fuerza laboral debido a algoritmos que sobrestimaron el valor de las propiedades. Este caso resalta los riesgos inherentes a modelos predictivos imprecisos en el sector inmobiliario.
+La precisión en la predicción de precios es crítica para el éxito financiero en el sector inmobiliario. Un ejemplo notable es el caso de Zillow Offers, que resultó en pérdidas de aproximadamente 500 millones de USD y la reducción del 25\% de su fuerza laboral debido a algoritmos que sobrestimaron el valor de las propiedades \citep{zillow2021}. Este caso resalta los riesgos inherentes a modelos predictivos imprecisos en el sector inmobiliario.
 
-El fundamento conceptual del modelo se basa en la teoría de precios hedónicos, propuesta por Rosen (1974). Esta teoría establece que el precio de una propiedad ($P_i$) es una función de sus características estructurales, de vecindario y amenidades locales: 
+El fundamento conceptual del modelo se basa en la teoría de precios hedónicos, propuesta por \citet{rosen1974}. Esta teoría establece que el precio de una propiedad ($P_i$) es una función de sus características estructurales, de vecindario y amenidades locales: 
 \[
 P_i = f(c_{i1}, c_{i2}, \ldots, c_{in})
 \]
-Dado que Rosen no especifica una forma funcional para $f$, esto permite explorar modelos de aprendizaje automático. Los precios hedónicos son precios implícitos de atributos revelados a partir de observaciones del mercado.
+Dado que \citet{rosen1974} no especifica una forma funcional para $f$, esto permite explorar modelos de aprendizaje automático. Los precios hedónicos son precios implícitos de atributos revelados a partir de observaciones del mercado.
 
 El modelo desarrollado busca estimar precios de oferta de viviendas en Chapinero, apoyando decisiones de compra de una startup, minimizando errores que puedan llevar a sobrevaloraciones. Los datos provienen de Properati, y ante la escasez de información específica para Chapinero, se enriquecieron mediante ingeniería de características desde fuentes externas y descripciones textuales.
 
-Se anticipa que el modelo \textit{Extreme Gradient Boosting} (XGBoost) ofrecerá resultados robustos y precisos, dada su eficacia con relaciones no lineales y datos de alta dimensionalidad, como ha sido demostrado en competencias de ciencia de datos y aplicaciones inmobiliarias.
+Se anticipa que el modelo \textit{Extreme Gradient Boosting} (XGBoost) ofrecerá resultados robustos y precisos, dada su eficacia con relaciones no lineales y datos de alta dimensionalidad \citep{chen2016xgboost}, como ha sido demostrado en competencias de ciencia de datos y aplicaciones inmobiliarias.
 
 \section{Datos}
 
@@ -138,17 +138,17 @@ Los datos utilizados consisten en dos bases proporcionadas por Properati: \textt
 
 \subsection{Construcción de la Muestra}
 
-La muestra se construyó mediante adquisición, limpieza y transformación de datos provenientes de Properati para Bogotá. Se diseñaron funciones específicas como \texttt{calculate\_antiguedad()}, que calcula la antigüedad de la publicación a partir del timestamp, y \texttt{transform\_property\_type()}, que codifica el tipo de propiedad en variables binarias como \texttt{is\_house}.
+La muestra se construyó mediante adquisición, limpieza y transformación de datos provenientes de Properati para Bogotá, siguiendo metodologías estándar de preprocesamiento de datos \citep{data_cleaning_tidyverse}. Se diseñaron funciones específicas como \texttt{calculate\_antiguedad()}, que calcula la antigüedad de la publicación a partir del timestamp, y \texttt{transform\_property\_type()}, que codifica el tipo de propiedad en variables binarias como \texttt{is\_house}.
 
 Esta distinción resultó fundamental, ya que se evidenciaron diferencias significativas en variables estructurales entre apartamentos y casas, tales como área cubierta y número de ambientes. Además, se conservaron únicamente aquellas propiedades ubicadas en Bogotá y con coordenadas válidas (lat/lon), garantizando así la integridad espacial de la muestra.
 
 \subsection{Limpieza y Tratamiento de Valores Faltantes}
 
-Se implementó la función \texttt{clean\_dataset()}, encargada de realizar un filtrado y estandarización rigurosos del conjunto de datos. Esta función eliminó variables irrelevantes como \texttt{city}, \texttt{surface\_total} y \texttt{rooms}, las cuales presentaban alta colinealidad o valores faltantes sin estructura sistemática.
+Se implementó la función \texttt{clean\_dataset()}, encargada de realizar un filtrado y estandarización rigurosos del conjunto de datos. Esta función eliminó variables irrelevantes como \texttt{city}, \texttt{surface\_total} y \texttt{rooms}, las cuales presentaban alta colinealidad o valores faltantes sin estructura sistemática, siguiendo las mejores prácticas documentadas en \citet{missing_values_part1} y \citet{missing_values_part2}.
 
 Posteriormente, se crearon nuevas variables como \texttt{antiguedad} y \texttt{is\_house}, y se homogeneizaron los nombres de columnas para facilitar el pipeline de modelado. La imputación de valores faltantes se realizó utilizando la mediana para variables continuas, una estrategia robusta ante outliers.
 
-Finalmente, la variable objetivo \texttt{price} fue transformada usando $\log(1 + \text{price})$, lo cual ayudó a estabilizar la varianza, mitigar la influencia de valores extremos, y mejorar la adecuación de los modelos lineales.
+Finalmente, la variable objetivo \texttt{price} fue transformada usando $\log(1 + \text{price})$, lo cual ayudó a estabilizar la varianza, mitigar la influencia de valores extremos, y mejorar la adecuación de los modelos lineales, siguiendo las recomendaciones de \citet{james2021introduction}.
 
 \subsection{Enriquecimiento de Variables}
 
@@ -212,7 +212,7 @@ Se observó una concentración geográfica en zonas centrales de Chapinero, con 
 
 \section{Modelos y Resultados}
 
-Se evaluaron múltiples algoritmos de aprendizaje automático siguiendo las especificaciones del problema, incluyendo al menos un modelo de cada familia requerida:
+Se evaluaron múltiples algoritmos de aprendizaje automático siguiendo las especificaciones del problema, incluyendo al menos un modelo de cada familia requerida según \citet{james2021introduction}:
 
 \begin{itemize}
 \item \textbf{Regresión Lineal}: Modelo base con todas las variables
@@ -259,7 +259,7 @@ Regresión Lineal & 142.8 & 145.2 \\
 
 \subsection{Modelo Seleccionado: XGBoost}
 
-XGBoost fue seleccionado como el modelo final debido a su desempeño superior en ambas estrategias de validación. Se utilizó el paquete \texttt{caret} en R con los siguientes hiperparámetros optimizados:
+XGBoost fue seleccionado como el modelo final debido a su desempeño superior en ambas estrategias de validación \citep{chen2016xgboost}. Se utilizó el paquete \texttt{caret} en R con los siguientes hiperparámetros optimizados:
 
 \begin{itemize}
 \item \texttt{nrounds}: 1000 (número de iteraciones)
@@ -348,19 +348,12 @@ Los resultados tienen implicaciones directas para la startup inmobiliaria:
 En síntesis, este estudio evidencia que la integración de técnicas de ciencia de datos, datos abiertos y procesamiento de lenguaje natural puede aportar soluciones efectivas y escalables para el análisis del mercado inmobiliario urbano en Colombia, proporcionando una base sólida para la toma de decisiones empresariales informadas.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% REFERENCIAS (integradas en el texto)
+% BIBLIOGRAFÍA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Las referencias están integradas en el texto sin usar BibTeX para evitar errores de compilación
-
-% Rosen, S. (1974). Hedonic prices and implicit markets: product differentiation in pure competition. Journal of political economy, 82(1), 34-55.
-
-% Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.
-
-% Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.
-
-% Boettiger, C., & Bivand, R. (2022). osmdata: Import 'OpenStreetMap' Data. R package version 0.1.7. https://CRAN.R-project.org/package=osmdata
-
-% Breiman, L. (2001). Random forests. Machine Learning, 45(1), 5–32.
+\pagebreak
+\singlespacing
+\nocite{*}
+\bibliography{references}
 
 \end{document}
