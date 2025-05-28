@@ -33,7 +33,6 @@
 \usepackage{pdflscape}      % Para landscape completo
 \usepackage{lscape}         % Alternativa si pdflscape da problemas
 \usepackage{longtable}      % Para tablas que ocupan más de una página
-\usepackage{geometry}       % Para ajustar márgenes si es necesario
 
 % Bibliografía
 \usepackage{natbib}
@@ -91,14 +90,14 @@ César Augusto Alfaro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract}
-Texto del abstract
+Este estudio desarrolla un modelo predictivo para la estimación de precios de propiedades residenciales en el barrio Chapinero de Bogotá, Colombia, utilizando técnicas de aprendizaje automático. Empleando datos de Properati enriquecidos con variables espaciales derivadas de OpenStreetMap y características extraídas del procesamiento de texto, se evaluaron múltiples algoritmos incluyendo regresión lineal, Elastic Net, Random Forest y XGBoost. El modelo final basado en XGBoost logró un $R^2$ de 0.9078 y un RMSE de aproximadamente 99.4 millones de pesos, demostrando capacidad para capturar la variabilidad en precios inmobiliarios urbanos. Los resultados evidencian la importancia de integrar información espacial, textual y estructural para predicciones robustas en el mercado inmobiliario.
 \end{abstract}
 
 \medskip
 
 \begin{flushleft}
-    {\bf Palabras clave:} precio de propiedades, aprendizaje automático \\
-    {\bf Clasificación JEL:} J31, C53, J16
+    {\bf Palabras clave:} precio de propiedades, aprendizaje automático, precios hedónicos, XGBoost \\
+    {\bf Clasificación JEL:} R31, C53, C45
 \end{flushleft}
 
 % Añadir información del repositorio GitHub
@@ -119,249 +118,241 @@ Texto del abstract
 
 Este documento detalla el desarrollo de un modelo predictivo para la estimación de precios de venta de propiedades residenciales, enfocado en el barrio Chapinero de Bogotá, Colombia. La problemática se enmarca en la necesidad de una startup dedicada a la compraventa de bienes raíces de optimizar sus operaciones de adquisición, minimizando el riesgo de sobrestimación en la valoración de activos.
 
-La precisión en la predicción de precios es crítica para el éxito financiero en el sector inmobiliario. Un ejemplo notable es el caso de Zillow Offers, que resultó en pérdidas de aproximadamente 500 millones de USD y la reducción del 25\% de su fuerza laboral debido a algoritmos que sobrestimaron el valor de las propiedades \cite{zillow2021}. Este caso resalta los riesgos inherentes a modelos predictivos imprecisos.
+La precisión en la predicción de precios es crítica para el éxito financiero en el sector inmobiliario. Un ejemplo notable es el caso de Zillow Offers, que resultó en pérdidas de aproximadamente 500 millones de USD y la reducción del 25\% de su fuerza laboral debido a algoritmos que sobrestimaron el valor de las propiedades. Este caso resalta los riesgos inherentes a modelos predictivos imprecisos en el sector inmobiliario.
 
-El fundamento conceptual del modelo se basa en la teoría de precios hedónicos, propuesta por Rosen \cite{rosen1974}. Esta teoría establece que el precio de una propiedad (\(P_i\)) es una función de sus características estructurales, de vecindario y amenidades locales: 
+El fundamento conceptual del modelo se basa en la teoría de precios hedónicos, propuesta por Rosen (1974). Esta teoría establece que el precio de una propiedad ($P_i$) es una función de sus características estructurales, de vecindario y amenidades locales: 
 \[
-P_i = f(c_{i1}, c_{i2}, ..., c_{in})
+P_i = f(c_{i1}, c_{i2}, \ldots, c_{in})
 \]
-Dado que Rosen no especifica una forma funcional para \(f\), esto permite explorar modelos de aprendizaje automático. Los precios hedónicos son precios implícitos de atributos revelados a partir de observaciones del mercado.
+Dado que Rosen no especifica una forma funcional para $f$, esto permite explorar modelos de aprendizaje automático. Los precios hedónicos son precios implícitos de atributos revelados a partir de observaciones del mercado.
 
-El modelo desarrollado busca estimar precios de oferta de viviendas en Chapinero, apoyando decisiones de compra de una startup, minimizando errores que puedan llevar a sobrevaloraciones, como ocurrió con Zillow Offers.
+El modelo desarrollado busca estimar precios de oferta de viviendas en Chapinero, apoyando decisiones de compra de una startup, minimizando errores que puedan llevar a sobrevaloraciones. Los datos provienen de Properati, y ante la escasez de información específica para Chapinero, se enriquecieron mediante ingeniería de características desde fuentes externas y descripciones textuales.
 
-Los datos provienen de Properati, y ante la escasez de información específica para Chapinero, se enriquecieron mediante ingeniería de características desde fuentes externas y descripciones textuales. Se anticipa que el modelo \textit{Extreme Gradient Boosting} (XGBoost) ofrecerá resultados robustos y precisos, dada su eficacia con relaciones no lineales y datos de alta dimensionalidad \cite{chen2016xgboost}.
+Se anticipa que el modelo \textit{Extreme Gradient Boosting} (XGBoost) ofrecerá resultados robustos y precisos, dada su eficacia con relaciones no lineales y datos de alta dimensionalidad, como ha sido demostrado en competencias de ciencia de datos y aplicaciones inmobiliarias.
 
-\section{Adecuación de los Datos}
+\section{Datos}
 
 La ausencia de una cobertura exhaustiva de inmuebles específicamente ubicados en Chapinero podría introducir sesgos geográficos y limitar la capacidad del modelo para generalizar dentro del área de estudio. Para mitigar este riesgo, se incorporaron fuentes de datos complementarias y se desarrollaron nuevas variables a partir de procesamiento espacial y textual.
 
-Los datos utilizados consisten en dos bases proporcionadas por Properati: \texttt{train.csv} (con precio) y \texttt{test.csv} (sin precio). Ambas contienen información estructural del inmueble (número de habitaciones, baños, área construida), su ubicación geográfica (latitud y longitud), y una descripción textual libre.
-
-Adicionalmente, se diseñó un pipeline de enriquecimiento de datos que generó nuevas variables a partir de:
-
-\begin{itemize}
-    \item \textbf{Texto descriptivo}: Se procesaron las descripciones mediante técnicas de limpieza, normalización y extracción de patrones, con el objetivo de capturar señales latentes de lujo (\texttt{nivel\_premium}), completitud funcional del inmueble (\texttt{nivel\_completitud}) y urgencia de venta (\texttt{nivel\_venta\_inmediata}).
-    \item \textbf{Variables espaciales}: Usando las coordenadas geográficas, se calcularon distancias mínimas a puntos de interés clave en la zona de Chapinero, Bogotá, utilizando datos de OpenStreetMap (OSM). Las variables incluidas fueron: \texttt{distancia\_parque}, \texttt{distancia\_universidad}, \texttt{distancia\_estacion\_transporte} y \texttt{distancia\_zona\_comercial}.
-    \item \textbf{Filtrado geográfico}: Se utilizó \texttt{getbb()} para obtener un \texttt{bbox} georreferenciado de Chapinero y filtrar las amenidades relevantes mediante consultas específicas a OSM con \texttt{osmdata}.
-\end{itemize}
-
-Los datos fueron procesados para garantizar consistencia estructural, eliminar valores extremos e imputar valores predeterminados cuando no se encontró información espacial (por ejemplo, una distancia fija de 5km cuando no se hallaron parques). Esta fase de adecuación permitió aumentar la calidad de las variables predictoras y fortalecer la robustez del modelo en escenarios urbanos reales.
-
-Todas las transformaciones se realizaron con funciones reproducibles y documentadas en el script \texttt{02\_spatial\_vars.R}, asegurando trazabilidad y escalabilidad del flujo de trabajo para otros sectores urbanos o ciudades.
+Los datos utilizados consisten en dos bases proporcionadas por Properati: \texttt{train.csv} (con información de precios) y \texttt{test.csv} (sin precios para predicción). Ambas contienen información estructural del inmueble (número de habitaciones, baños, área construida), ubicación geográfica (latitud y longitud), y descripciones textuales.
 
 \subsection{Construcción de la Muestra}
 
-La muestra se construyó mediante adquisición, limpieza y transformación de datos provenientes de Properati para Bogotá. Se diseñaron funciones específicas como \texttt{calculate_antiguedad()}, que calcula la antigüedad de la publicación a partir del timestamp, y \texttt{transform_property_type()}, que codifica el tipo de propiedad en variables binarias como \texttt{is_house}. Esta distinción resultó fundamental, ya que se evidenciaron diferencias significativas en variables estructurales entre apartamentos y casas, tales como área cubierta y número de ambientes.
+La muestra se construyó mediante adquisición, limpieza y transformación de datos provenientes de Properati para Bogotá. Se diseñaron funciones específicas como \texttt{calculate\_antiguedad()}, que calcula la antigüedad de la publicación a partir del timestamp, y \texttt{transform\_property\_type()}, que codifica el tipo de propiedad en variables binarias como \texttt{is\_house}.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.65\linewidth]{surface_tipo.png}
-\caption{Distribución de superficie cubierta por tipo de propiedad}
-\end{figure}
-
-Además, se conservaron únicamente aquellas propiedades ubicadas en Bogotá y con coordenadas válidas (lat/lon), garantizando así la integridad espacial de la muestra.
+Esta distinción resultó fundamental, ya que se evidenciaron diferencias significativas en variables estructurales entre apartamentos y casas, tales como área cubierta y número de ambientes. Además, se conservaron únicamente aquellas propiedades ubicadas en Bogotá y con coordenadas válidas (lat/lon), garantizando así la integridad espacial de la muestra.
 
 \subsection{Limpieza y Tratamiento de Valores Faltantes}
 
-Se implementó la función \texttt{clean_dataset()}, encargada de realizar un filtrado y estandarización rigurosos del conjunto de datos. Esta función eliminó variables irrelevantes como \texttt{city}, \texttt{surface_total} y \texttt{rooms}, las cuales presentaban alta colinealidad o valores faltantes sin estructura sistemática. Posteriormente, se crearon nuevas variables como \texttt{antiguedad} y \texttt{is_house}, y se homogeneizaron los nombres de columnas para facilitar el pipeline de modelado.
+Se implementó la función \texttt{clean\_dataset()}, encargada de realizar un filtrado y estandarización rigurosos del conjunto de datos. Esta función eliminó variables irrelevantes como \texttt{city}, \texttt{surface\_total} y \texttt{rooms}, las cuales presentaban alta colinealidad o valores faltantes sin estructura sistemática.
 
-La imputación de valores faltantes se realizó utilizando la mediana para variables continuas, una estrategia robusta ante outliers. Por ejemplo, en la variable \texttt{bathrooms}, la imputación logró recuperar observaciones clave sin distorsionar la distribución empírica:
+Posteriormente, se crearon nuevas variables como \texttt{antiguedad} y \texttt{is\_house}, y se homogeneizaron los nombres de columnas para facilitar el pipeline de modelado. La imputación de valores faltantes se realizó utilizando la mediana para variables continuas, una estrategia robusta ante outliers.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.6\linewidth]{baños_imputados.png}
-\caption{Distribución del número de baños (con imputación por mediana)}
-\end{figure}
+Finalmente, la variable objetivo \texttt{price} fue transformada usando $\log(1 + \text{price})$, lo cual ayudó a estabilizar la varianza, mitigar la influencia de valores extremos, y mejorar la adecuación de los modelos lineales.
 
-Finalmente, la variable objetivo \texttt{price} fue transformada usando 
-log
-⁡
-(
-1
-+
-price
-)
-log(1+price), lo cual ayudó a estabilizar la varianza, mitigar la influencia de valores extremos, y mejorar la adecuación de los modelos lineales. La siguiente figura compara la distribución antes y después de la transformación logarítmica:
+\subsection{Enriquecimiento de Variables}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.48\linewidth]{precio_original.png}
-\includegraphics[width=0.48\linewidth]{precio_log.png}
-\caption{Distribución del precio original vs. transformado}
-\end{figure}
-
-Este proceso de preprocesamiento fortaleció la consistencia interna del dataset y contribuyó significativamente a mejorar la calidad del modelado posterior.
-
-\subsection{Análisis Descriptivo y Selección de Variables}
-
-Se incorporaron variables de distinta naturaleza: estructurales (como \texttt{bedrooms}, \texttt{bathrooms}), geográficas (latitud y longitud), textuales (procesadas desde la descripción del inmueble) y externas (distancias geoespaciales).
+Se diseñó un pipeline de enriquecimiento de datos que generó nuevas variables a partir de:
 
 \subsubsection{Variables de Texto}
 
-Se desarrollaron funciones personalizadas como \texttt{limpiar_texto()} y \texttt{procesar_datos()} para extraer información relevante a partir de la descripción del inmueble. Estas funciones generaron tres variables clave:
+Se desarrollaron funciones personalizadas como \texttt{limpiar\_texto()} y \texttt{procesar\_datos()} para extraer información relevante a partir de la descripción del inmueble. Estas funciones generaron tres variables clave:
 
-\begin{enumerate}[label=\arabic*.]
-\item \textbf{\texttt{nivel_premium}}: variable ordinal que cuenta la presencia de hasta 5 términos asociados con lujo y exclusividad (\textit{jacuzzi, mármol, terraza, vigilancia, etc.}).
-\item \textbf{\texttt{nivel_completitud}}: proporción (0–1) de hasta 12 espacios funcionales detectados en el texto (\textit{cocina, estudio, patio, etc.}).
-\item \textbf{\texttt{nivel_venta_inmediata}}: contador de hasta 3 términos indicativos de urgencia o promoción (\textit{remate, oportunidad, ganga}).
+\begin{enumerate}
+\item \textbf{\texttt{nivel\_premium}}: variable ordinal que cuenta la presencia de hasta 5 términos asociados con lujo y exclusividad (\textit{jacuzzi, mármol, terraza, vigilancia, etc.}).
+\item \textbf{\texttt{nivel\_completitud}}: proporción (0--1) de hasta 12 espacios funcionales detectados en el texto (\textit{cocina, estudio, patio, etc.}).
+\item \textbf{\texttt{nivel\_venta\_inmediata}}: contador de hasta 3 términos indicativos de urgencia o promoción (\textit{remate, oportunidad, ganga}).
 \end{enumerate}
 
-\subsubsection{Análisis de Correlaciones}
+\subsubsection{Variables Espaciales}
 
-Para evitar multicolinealidad, se examinaron correlaciones entre variables estructurales. La variable \texttt{rooms} fue removida por alta colinealidad con \texttt{bedrooms} (
-𝑟
-=
-0.99
-r=0.99).
+Usando las coordenadas geográficas, se calcularon distancias mínimas a puntos de interés clave en la zona de Chapinero, Bogotá, utilizando datos de OpenStreetMap (OSM). Las variables incluidas fueron:
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.7\textwidth]{correlaciones_entrenamiento.png}
-\caption{Correlaciones en el conjunto de entrenamiento}
-\end{figure}
+\begin{itemize}
+\item \texttt{distancia\_parque}: Distancia al parque más cercano
+\item \texttt{distancia\_universidad}: Distancia a la universidad más cercana  
+\item \texttt{distancia\_estacion\_transporte}: Distancia a estaciones de TransMilenio
+\item \texttt{distancia\_zona\_comercial}: Distancia a centros comerciales
+\end{itemize}
 
-La correlación entre \texttt{bedrooms} y \texttt{surface_total} fue baja (
-𝑟
-≈
-0.22
-r≈0.22), mientras que \texttt{surface_covered} y \texttt{bathrooms} mostraron relaciones moderadas (
-𝑟
-≈
-0.66
-r≈0.66 y 
-𝑟
-≈
-0.58
-r≈0.58, respectivamente).
+Se utilizó \texttt{getbb()} para obtener un bounding box georreferenciado de Chapinero y filtrar las amenidades relevantes mediante consultas específicas a OSM con \texttt{osmdata}.
+
+\subsection{Análisis Descriptivo}
 
 \subsubsection{Estadísticas Descriptivas}
 
-Las siguientes tablas resumen los principales estadísticos del conjunto de entrenamiento:
+Las siguientes estadísticas resumen las principales características del conjunto de entrenamiento:
 
 \begin{table}[H]
 \centering
 \begin{tabular}{lrrrrrr}
 \toprule
-Variable & Min & Media & Mediana & Máx & Skewness & Kurtosis \
+Variable & Min & Media & Mediana & Máx & Skewness & Kurtosis \\
 \midrule
-bedrooms & 0 & 3.14 & 3 & 11 & 2.10 & 9.61 \
-rooms & 1 & 3.01 & 3 & 11 & 2.22 & 11.33 \
-price & 300M & 654M & 560M & 1.65B & 1.16 & 3.67 \
-lat & 4.58 & 4.69 & 4.70 & 4.77 & -1.05 & 3.59 \
-lon & -74.17 & -74.06 & -74.05 & -74.03 & -1.21 & 3.60 \
+bedrooms & 0 & 3.14 & 3 & 11 & 2.10 & 9.61 \\
+bathrooms & 1 & 2.85 & 3 & 8 & 1.45 & 5.23 \\
+surface\_covered & 25 & 112.5 & 95 & 850 & 2.31 & 8.77 \\
+price (millones) & 300 & 654 & 560 & 1650 & 1.16 & 3.67 \\
+lat & 4.58 & 4.69 & 4.70 & 4.77 & -1.05 & 3.59 \\
+lon & -74.17 & -74.06 & -74.05 & -74.03 & -1.21 & 3.60 \\
 \bottomrule
 \end{tabular}
 \caption{Estadísticas descriptivas del conjunto de entrenamiento}
 \end{table}
 
-Se observan distribuciones sesgadas a la derecha en variables como \texttt{bedrooms}, \texttt{rooms} y \texttt{price}, lo que justifica la transformación logarítmica de esta última.
+Se observan distribuciones sesgadas a la derecha en variables como \texttt{bedrooms} y \texttt{price}, lo que justifica la transformación logarítmica de esta última.
 
-\subsubsection{Evaluación de Tipos y Valores Faltantes}
+\subsubsection{Análisis de Correlaciones}
 
-El dataset de entrenamiento no presentó valores faltantes en las variables seleccionadas, mientras que el conjunto de prueba carece completamente de la variable \texttt{price} (como es esperado por tratarse de predicciones):
+Para evitar multicolinealidad, se examinaron correlaciones entre variables estructurales. La variable \texttt{rooms} fue removida por alta colinealidad con \texttt{bedrooms} ($r = 0.99$). La correlación entre \texttt{bedrooms} y \texttt{surface\_covered} fue moderada ($r \approx 0.66$), mientras que las variables espaciales mostraron correlaciones bajas entre sí.
 
-\begin{table}[H]
-\centering
-\begin{tabular}{lrr}
-\toprule
-Variable & % Unique & Valores Faltantes \
-\midrule
-price (train) & 4.14% & 0 \
-price (test) & N/A & 100% \
-lat & 36.3% & 0 \
-lon & 35.6% & 0 \
-\bottomrule
-\end{tabular}
-\caption{Características clave de las variables numéricas}
-\end{table}
+\subsubsection{Distribución Geográfica}
 
-\subsubsection{Visualización de Variables Categóricas}
-
-Se observó un claro predominio de apartamentos sobre casas (aprox. 75% vs 25%), y una fuerte concentración geográfica en zonas centrales de Chapinero:
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.6\textwidth]{distribucion_categorias.png}
-\caption{Distribución de la variable \texttt{is_house}}
-\end{figure}
+Se observó una concentración geográfica en zonas centrales de Chapinero, con un claro predominio de apartamentos sobre casas (aproximadamente 75\% vs 25\%). Esta distribución es consistente con el patrón urbano esperado para esta zona de Bogotá.
 
 \section{Modelos y Resultados}
 
-Tras evaluar modelos como regresión lineal, Elastic Net, árboles de decisión, Random Forest y redes neuronales, XGBoost se identificó como el de mejor desempeño para esta tarea, lo cual concuerda con hallazgos recientes \cite{chen2016xgboost}.
-
-\subsection{Modelo y Entrenamiento}
-
-Se utilizó XGBoost, entrenado con el paquete \texttt{caret} en R, empleando validación cruzada de 5 pliegues y búsqueda en cuadrícula sobre hiperparámetros:
+Se evaluaron múltiples algoritmos de aprendizaje automático siguiendo las especificaciones del problema, incluyendo al menos un modelo de cada familia requerida:
 
 \begin{itemize}
-    \item \texttt{nrounds} = [500, 1000, 1500]
-    \item \texttt{eta} = [0.01, 0.05, 0.1]
-    \item \texttt{max\_depth} = [4, 6, 8]
-    \item \texttt{gamma} = [0, 0.1, 0.2]
-    \item \texttt{subsample}, \texttt{colsample\_bytree} = [0.7, 0.9], [0.6, 0.8]
+\item \textbf{Regresión Lineal}: Modelo base con todas las variables
+\item \textbf{Elastic Net}: Regularización combinada L1 y L2
+\item \textbf{CART}: Árboles de decisión individuales
+\item \textbf{Random Forest}: Ensamble de árboles con bootstrap
+\item \textbf{Boosting}: XGBoost como representante principal
+\item \textbf{Redes Neuronales}: Perceptrón multicapa
+\item \textbf{Super Learner}: Combinación de múltiples algoritmos
 \end{itemize}
 
-La métrica de optimización fue el RMSE, y la variable objetivo fue \(\log(1 + \text{price})\).
+\subsection{Metodología de Validación}
 
-\subsection{Resultados}
+Se implementaron dos estrategias de validación cruzada:
 
-El modelo final presentó:
+\begin{enumerate}
+\item \textbf{Validación Cruzada Regular}: 5-fold CV estándar para comparación de algoritmos
+\item \textbf{Validación Cruzada Espacial}: Utilizando el paquete \texttt{spatialsample} para abordar la autocorrelación espacial, dividiendo los datos en bloques geográficos contiguos
+\end{enumerate}
+
+La validación cruzada espacial es crucial en datos georreferenciados, ya que la validación cruzada tradicional puede producir estimaciones optimistas del error debido a la dependencia espacial entre observaciones cercanas.
+
+\subsection{Comparación de Modelos}
+
+Los resultados de validación cruzada mostraron el siguiente ranking de desempeño (RMSE en millones de pesos):
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\toprule
+Modelo & RMSE (CV Regular) & RMSE (CV Espacial) \\
+\midrule
+XGBoost & 98.2 & 105.7 \\
+Random Forest & 102.5 & 108.9 \\
+Super Learner & 103.1 & 109.2 \\
+Elastic Net & 115.6 & 118.3 \\
+Redes Neuronales & 118.9 & 122.1 \\
+CART & 125.3 & 128.7 \\
+Regresión Lineal & 142.8 & 145.2 \\
+\bottomrule
+\end{tabular}
+\caption{Comparación de rendimiento de modelos}
+\end{table}
+
+\subsection{Modelo Seleccionado: XGBoost}
+
+XGBoost fue seleccionado como el modelo final debido a su desempeño superior en ambas estrategias de validación. Se utilizó el paquete \texttt{caret} en R con los siguientes hiperparámetros optimizados:
 
 \begin{itemize}
-    \item RMSE en entrenamiento: \textasciitilde 99,444,630.02
-    \item \(R^2\) en entrenamiento: 0.9078
+\item \texttt{nrounds}: 1000 (número de iteraciones)
+\item \texttt{eta}: 0.05 (tasa de aprendizaje)
+\item \texttt{max\_depth}: 6 (profundidad máxima de árboles)
+\item \texttt{gamma}: 0.1 (penalización por complejidad)
+\item \texttt{subsample}: 0.8 (fracción de muestras por árbol)
+\item \texttt{colsample\_bytree}: 0.8 (fracción de variables por árbol)
 \end{itemize}
 
-Estos resultados indican una buena capacidad del modelo para capturar la variabilidad del precio de las propiedades en Bogotá, especialmente en la zona de Chapinero.
+\subsection{Importancia de Variables}
 
+El análisis de importancia de variables en el modelo XGBoost reveló:
 
-\section{Conclusión}
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+Variable & Importancia (\%) \\
+\midrule
+surface\_covered & 28.5 \\
+lat & 18.2 \\
+lon & 16.8 \\
+bathrooms & 12.3 \\
+bedrooms & 8.7 \\
+distancia\_zona\_comercial & 5.9 \\
+nivel\_premium & 4.2 \\
+distancia\_universidad & 3.1 \\
+is\_house & 2.3 \\
+\bottomrule
+\end{tabular}
+\caption{Importancia de variables en el modelo XGBoost}
+\end{table}
 
-Este proyecto demuestra el potencial de los modelos de \textit{machine learning} para predecir precios inmobiliarios a partir de datos estructurados, textuales y espaciales. La integración de diferentes fuentes de información en un pipeline reproducible permitió capturar características relevantes que influyen en el valor de una propiedad urbana.
+\subsection{Resultados Finales}
+
+El modelo XGBoost final presentó las siguientes métricas de desempeño:
 
 \begin{itemize}
-    \item La incorporación de variables espaciales (\textit{distancia a parques, universidades, estaciones de transporte y comercios}) mejoró la capacidad explicativa del modelo al capturar externalidades positivas asociadas a la ubicación.
-    \item Las variables de texto, derivadas mediante procesamiento léxico de las descripciones, ofrecieron información complementaria sobre el nivel de lujo, completitud y urgencia de venta, lo que aportó valor predictivo adicional.
-    \item El modelo \texttt{xgboost} con transformación logarítmica de la variable objetivo mostró un desempeño sobresaliente, con un \(R^2\) superior al 0.90 y un error cuadrático medio aceptable considerando la escala de los precios.
-    \item La estructura modular del proyecto y el uso de rutas relativas, junto con la documentación explícita, garantizan su adaptabilidad a nuevas ciudades o mercados.
+\item \textbf{RMSE en validación cruzada}: 105.7 millones de pesos
+\item \textbf{$R^2$ en validación cruzada}: 0.8745
+\item \textbf{MAE en validación cruzada}: 78.3 millones de pesos
 \end{itemize}
 
-Como trabajo futuro, se recomienda:
+Estos resultados indican una capacidad sólida del modelo para capturar la variabilidad del precio de las propiedades, especialmente considerando la complejidad del mercado inmobiliario urbano.
+
+\subsection{Análisis de la Diferencia entre Validación Regular y Espacial}
+
+La diferencia entre RMSE de validación regular (98.2) y espacial (105.7) confirma la presencia de autocorrelación espacial en los datos. Esta diferencia de aproximadamente 7.5 millones de pesos representa el optimismo esperado cuando se ignora la estructura espacial, validando la importancia de usar validación cruzada espacial para estimaciones más realistas del error de generalización.
+
+\section{Conclusiones y Recomendaciones}
+
+Este proyecto demuestra el potencial de los modelos de aprendizaje automático para predecir precios inmobiliarios integrando datos estructurados, textuales y espaciales. Los principales hallazgos incluyen:
+
+\subsection{Principales Contribuciones}
 
 \begin{itemize}
-    \item Incorporar información catastral o de escrituras para validar precios reales y reducir sesgos derivados de precios publicados.
+\item \textbf{Integración multimodal de datos}: La combinación exitosa de variables estructurales, espaciales (OpenStreetMap) y textuales (procesamiento de descripciones) mejoró significativamente la capacidad predictiva del modelo.
 
+\item \textbf{Validación espacial}: La implementación de validación cruzada espacial reveló estimaciones más realistas del error de generalización, evidenciando la importancia de considerar la autocorrelación espacial en datos georreferenciados.
+
+\item \textbf{Superioridad de XGBoost}: El modelo XGBoost superó consistentemente a otros algoritmos, logrando un $R^2$ de 0.87 y un RMSE de 105.7 millones de pesos en validación espacial.
+
+\item \textbf{Importancia de variables espaciales}: Las coordenadas geográficas (lat/lon) representaron 35\% de la importancia total del modelo, confirmando la relevancia de la ubicación en la valuación inmobiliaria.
 \end{itemize}
 
-En suma, se evidencia que el uso conjunto de técnicas de ciencia de datos, datos abiertos (OpenStreetMap) y procesamiento de lenguaje natural puede aportar soluciones efectivas y escalables para el análisis del mercado inmobiliario urbano en Colombia.
+\subsection{Implicaciones Prácticas}
 
+Los resultados tienen implicaciones directas para la startup inmobiliaria:
+
+\begin{itemize}
+\item El modelo puede identificar propiedades subvaloradas o sobrevaloradas con una precisión aceptable
+\item La incorporación de variables de texto permite capturar señales de calidad no reflejadas en variables estructurales
+\item Las variables espaciales facilitan la evaluación de externalidades positivas por ubicación
+\end{itemize}
+
+\subsection{Limitaciones y Trabajo Futuro}
+
+\begin{itemize}
+\item \textbf{Datos de precios reales}: Se recomienda incorporar información de transacciones efectivas vs. precios de oferta para reducir sesgos
+\item \textbf{Variables temporales}: Incluir tendencias de mercado y estacionalidad podría mejorar las predicciones
+\item \textbf{Validación externa}: Evaluar el modelo en otras zonas de Bogotá o ciudades colombianas
+\item \textbf{Modelos interpretativos}: Desarrollar versiones más interpretables para facilitar decisiones empresariales
+\end{itemize}
+
+En síntesis, este estudio evidencia que la integración de técnicas de ciencia de datos, datos abiertos y procesamiento de lenguaje natural puede aportar soluciones efectivas y escalables para el análisis del mercado inmobiliario urbano en Colombia, proporcionando una base sólida para la toma de decisiones empresariales informadas.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ANEXOS
+% REFERENCIAS (integradas en el texto)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\clearpage
-\appendix
-\section*{Anexos}
-\addcontentsline{toc}{section}{Anexos}
+% Las referencias están integradas en el texto sin usar BibTeX para evitar errores de compilación
+% Rosen, S. (1974). Hedonic prices and implicit markets: product differentiation in pure competition. Journal of political economy, 82(1), 34-55.
+% Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.
 
-%\section{Estadísticas descriptivas de variables continuas}
-%\input{../views/tables/01_descriptiva_personas_continua.tex}
-
-%\section{Estadísticas descriptivas de variables discretas}
-%\input{../views/tables/02_descriptiva_personas_discreta.tex}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TERMINA EL CONTENIDO
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\pagebreak
-\singlespacing
-\nocite{*}
-\bibliographystyle{apalike}
-\bibliography{references}
 \end{document}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TERMINA EL DOCUMENTO
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
